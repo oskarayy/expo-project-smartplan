@@ -1,12 +1,29 @@
 import { StyleSheet, View, Text, ImageBackground, Image } from 'react-native';
+import { useDispatch } from 'react-redux';
+
 import Button from '../components/interface/Button';
-import { Colors } from '../constants/Colors';
 import { Fonts } from '../constants/Fonts';
+
+import { setTasks } from '../store/reducers/taskSlice';
+import { setProjects } from '../store/reducers/projectSlice';
+import { getData } from '../utils/storage';
 
 const cmImage = require('../assets/cmimage.png');
 const backgroundImage = require('../assets/splash-bg-md.jpg');
 
 const Welcome = ({ navigation }) => {
+  const dispatch = useDispatch();
+
+  const getDataFromStorage = async () => {
+    const projects = await getData('projects');
+    const tasks = await getData('tasks');
+
+    if (Array.isArray(projects)) dispatch(setProjects(projects));
+    if (Array.isArray(tasks)) dispatch(setTasks(tasks));
+  };
+
+  getDataFromStorage();
+
   const openDashboard = () => {
     navigation.navigate('dashboard');
   };

@@ -2,12 +2,15 @@ import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
-import { Fonts } from '../../../constants/Fonts';
+import { Styles } from '../../../constants/Styles';
 import { getFormattedDate } from '../../../utils/getFormattedDate';
 
 import Button from '../../interface/Button';
 import ProjectStatus from '../../home/projects-overview/ProjectStatus';
-import { Styles } from '../../../constants/Styles';
+
+import { useDispatch } from 'react-redux';
+import { removeProject } from '../../../store/reducers/projectSlice';
+import { removeTask } from '../../../store/reducers/taskSlice';
 
 const icons = {
   love: 'heart-outline',
@@ -28,6 +31,7 @@ const categoriesPL = {
 };
 
 const GridItem = ({ item, progress, mainConfig = {} }) => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const openProjectHandler = () => {
@@ -35,6 +39,11 @@ const GridItem = ({ item, progress, mainConfig = {} }) => {
       screen: 'projectDetail',
       params: { id: item.id }
     });
+  };
+
+  const removeProjectHandler = () => {
+    dispatch(removeProject(item.id));
+    dispatch(removeTask({ mode: 'multi', id: item.id }));
   };
 
   let date = getFormattedDate(item.deadline, 'short');
@@ -66,20 +75,35 @@ const GridItem = ({ item, progress, mainConfig = {} }) => {
         </View>
         {mainConfig.enhanced && (
           <Text style={{ ...Styles.desc }}>
-            {item.desc === undefined
-              ? 'Nie dodano jeszcze opisu projektu...'
+            {item.desc.length < 1
+              ? 'Nie dodano jeszcze opisu projektu'
               : item.desc}
           </Text>
         )}
         <ProjectStatus progress={progress} procent={item.progress} />
         {mainConfig.enhanced && (
-          <Button
-            onPress={openProjectHandler}
-            style={styles.tasksButton}
-            buttonStyle={styles.buttonStyle}
-            textStyle={{ fontSize: 12 }}>
-            Szczegóły
-          </Button>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-around',
+              marginTop: 2,
+              marginHorizontal: 16
+            }}>
+            <Button
+              onPress={removeProjectHandler}
+              style={styles.tasksButton}
+              buttonStyle={[styles.buttonStyle, { borderColor: Colors.accent }]}
+              textStyle={{ fontSize: 12, color: Colors.gray400 }}>
+              Usuń
+            </Button>
+            <Button
+              onPress={openProjectHandler}
+              style={styles.tasksButton}
+              buttonStyle={styles.buttonStyle}
+              textStyle={{ fontSize: 12 }}>
+              Szczegóły
+            </Button>
+          </View>
         )}
       </Pressable>
     </View>

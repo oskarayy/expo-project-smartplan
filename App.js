@@ -3,10 +3,11 @@ import 'react-native-gesture-handler';
 import { useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Provider } from 'react-redux';
 import * as SplashScreen from 'expo-splash-screen';
-import { store } from './store';
 
+//data
+import { Provider } from 'react-redux';
+import { store } from './store';
 // design //
 import { Fonts } from './constants/Fonts';
 import { Colors } from './constants/Colors';
@@ -199,6 +200,10 @@ const Dashboard = () => {
 };
 
 export default function App() {
+  // const dataReady = getDataFromStorage();
+
+  // console.log(dataReady);
+
   const [fontsLoaded] = useFonts({
     Mulish_300Light,
     Mulish_400Regular,

@@ -20,7 +20,7 @@ const ProjectDetailScreen = ({ route, navigation }) => {
   const categories = useSelector((state) => state.projectSlice.categories);
 
   const projectId = route.params.id;
-  const project = projects.find((item) => item.id === projectId);
+  const project = projects.find((item) => item.id === projectId) ?? {};
   const category = categories.find((cat) => cat.id === project.category);
   const progress = useSharedValue(0);
   const getTaskTime = (task) => new Date(task.deadline).getTime();

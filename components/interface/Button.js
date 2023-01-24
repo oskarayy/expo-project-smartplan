@@ -22,14 +22,14 @@ const styles = StyleSheet.create({
   },
   button: {
     padding: 14,
-    borderColor: Colors.white,
+    borderColor: Colors.gray400,
     borderWidth: 0.5,
     borderRadius: 24,
     backgroundColor: 'transparent'
   },
   text: {
     fontFamily: 'Mulish_400Regular',
-    color: Colors.white,
+    color: Colors.gray400,
     fontSize: 16,
     textAlign: 'center'
   }

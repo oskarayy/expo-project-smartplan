@@ -1,13 +1,15 @@
 import { useEffect, useLayoutEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSelector } from 'react-redux';
+import { useSharedValue, withTiming } from 'react-native-reanimated';
+
 import { Colors } from '../../constants/Colors';
 import { Styles } from '../../constants/Styles';
 
 import HeaderIconButton from '../../components/interface/HeaderIconButton';
 import ProjectsGrid from '../../components/home/projects-overview/ProjectsGrid';
 import Blur from '../../components/interface/Blur';
+import NoItemsFound from '../../components/interface/NoItemsFound';
 
 const ProjectCategoryScreen = ({ route, navigation }) => {
   const projects = useSelector((state) => state.projectSlice.projects);
@@ -48,6 +50,8 @@ const ProjectCategoryScreen = ({ route, navigation }) => {
       (proj) => proj.category === activeCategory.id
     );
   }
+
+  if (projectsToDisplay.length < 1) return <NoItemsFound />;
 
   return (
     <View style={styles.root}>

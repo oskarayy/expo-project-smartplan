@@ -80,22 +80,35 @@ const dummy_tasks = [
   }
 ];
 
+import { sendTasks } from '../../utils/storage';
+
 const taskSlice = createSlice({
   name: 'tasks',
   initialState: {
-    tasks: dummy_tasks
+    tasks: []
   },
   reducers: {
+    setTasks: (state, action) => {
+      state.tasks = action.payload;
+    },
     addTask: (state, action) => {
-      console.log(action.payload);
       const newTask = action.payload;
       state.tasks = [...state.tasks, newTask];
+      sendTasks(state.tasks);
     },
     removeTask: (state, action) => {
-      const updatedList = state.tasks.filter(
-        (task) => task.id !== action.payload.id
-      );
+      let updatedList;
+      if (action.payload.mode === 'single') {
+        updatedList = state.tasks.filter(
+          (task) => task.id !== action.payload.id
+        );
+      } else if (action.payload.mode === 'multi') {
+        updatedList = state.tasks.filter(
+          (task) => task.projectId !== action.payload.id
+        );
+      }
       state.tasks = updatedList;
+      sendTasks(updatedList);
     },
     toggleTaskState: (state, action) => {
       const taskIndex = state.tasks.findIndex(
@@ -103,10 +116,12 @@ const taskSlice = createSlice({
       );
       if (taskIndex === -1) return;
       state.tasks[taskIndex].finished = !state.tasks[taskIndex].finished;
+      sendTasks(state.tasks);
     }
   }
 });
 
+export const setTasks = taskSlice.actions.setTasks;
 export const addTask = taskSlice.actions.addTask;
 export const removeTask = taskSlice.actions.removeTask;
 export const toggleTaskState = taskSlice.actions.toggleTaskState;

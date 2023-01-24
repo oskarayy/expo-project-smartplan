@@ -15,8 +15,7 @@ DropDownPicker.setLanguage('PL');
 DropDownPicker.addTheme('MyThemeName', myTheme);
 DropDownPicker.setTheme('MyThemeName');
 
-const DropdownPicker = ({ data, value, onChange }) => {
-  console.log(value);
+const DropdownPicker = ({ data, value, onChange, onValid }) => {
   const route = useRoute();
 
   const [open, setOpen] = useState(false);
@@ -25,6 +24,10 @@ const DropdownPicker = ({ data, value, onChange }) => {
   useEffect(() => {
     setItems(data);
   }, [data]);
+
+  useEffect(() => {
+    onValid();
+  }, [value]);
 
   useEffect(() => {
     if (route.params) onChange(route.params?.id);

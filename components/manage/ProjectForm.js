@@ -1,21 +1,28 @@
 import { useState } from 'react';
 import { StyleSheet, View, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { checkProjectValues } from '../../utils/checkFromValues';
 import { addProject, updateProject } from '../../store/reducers/projectSlice';
 import { addTask } from '../../store/reducers/taskSlice';
-
 import { Colors } from '../../constants/Colors';
 
 import DatePicker from './form/DatePicker';
 import DropdownPicker from './form/DropdownPicker';
 import FormItem from './form/FormItem';
 import FormControls from './form/FormControls';
+import { getFormattedDate } from '../../utils/getFormattedDate';
 
 const ProjectForm = ({ type, mode, onType, activeProject }) => {
   const dispatch = useDispatch();
+  const todayFormatted = new Date().toISOString().slice(0, 10);
+
   const [dropdownValue, setDropdownValue] = useState(activeProject ?? null);
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [title, setTitle] = useState('');
+  const [dropdownIsValid, setDropdownIsValid] = useState(true);
+  const [date, setDate] = useState(todayFormatted);
+  const [title, setTitle] = useState({
+    value: '',
+    isValid: true
+  });
   const [description, setDescription] = useState('');
 
   const categories = useSelector((state) => state.projectSlice.categories);
@@ -34,50 +41,68 @@ const ProjectForm = ({ type, mode, onType, activeProject }) => {
   }));
 
   const formSubmitHandler = () => {
+    const actualTimeMs = new Date().getTime();
+    const validation = checkProjectValues({
+      titleValue: title.value,
+      dropdownValue
+    });
+
+    if (!validation.form) {
+      setDropdownIsValid(validation.dropdown);
+      setTitle((prevState) => ({ ...prevState, isValid: validation.title }));
+      return validation;
+    }
+
     if (type === 'task') {
       const { tasks } = projects.find(
         (project) => project.id === dropdownValue
       );
-      dispatch(
-        addTask({
-          id: `${dropdownValue}-task-${new Date().getTime()}`,
-          task: title,
-          projectId: dropdownValue,
-          deadline: date,
-          finished: false
-        })
-      );
+      const newTask = {
+        id: `${dropdownValue}-task-${actualTimeMs}`,
+        task: title.value.trim(),
+        projectId: dropdownValue,
+        deadline: date,
+        finished: false
+      };
+      dispatch(addTask(newTask));
       dispatch(
         updateProject({
           id: dropdownValue,
           tasks: { ...tasks, active: tasks.active + 1 }
         })
       );
+    } else if (type === 'project') {
+      const newProject = {
+        id: `project-${dropdownValue}-${actualTimeMs}`,
+        title: title.value.trim(),
+        desc: description.trim(),
+        category: dropdownValue,
+        progress: 0,
+        tasks: { active: 0, finished: 0 },
+        deadline: date
+      };
+      dispatch(addProject(newProject));
     }
 
-    if (type === 'project')
-      dispatch(
-        addProject({
-          id: `project-${dropdownValue}-${new Date().getTime()}`,
-          title: title.trim(),
-          desc: description.trim(),
-          category: dropdownValue,
-          progress: 0,
-          tasks: { active: 0, finished: 0 },
-          deadline: date
-        })
-      );
+    setDate(todayFormatted);
+    setDropdownValue(null);
+    setDropdownIsValid(true);
+    setDescription('');
+    setTitle({ value: '', isValid: true });
+    return validation;
   };
 
   return (
     <View style={styles.form}>
       <View style={styles.pickersContainer}>
         <FormItem
+          isValid={dropdownIsValid}
           label={type === 'project' ? 'Kategoria' : 'Projekt'}
           itemStyle={styles.dropdown}>
           <DropdownPicker
             value={dropdownValue}
             onChange={setDropdownValue}
+            onValid={setDropdownIsValid.bind(true)}
             data={type === 'project' ? categoryPickerData : projectPickerData}
           />
         </FormItem>
@@ -90,9 +115,11 @@ const ProjectForm = ({ type, mode, onType, activeProject }) => {
         </FormItem>
       </View>
       <FormItem
+        isValid={title.isValid}
         label={type === 'project' ? 'Projekt' : 'Zadanie'}
         inputConfig={{
-          onChangeText: (text) => setTitle(text),
+          value: title.value,
+          onChangeText: (text) => setTitle({ isValid: true, value: text }),
           required: true,
           placeholder: 'Jaki cel siedzi Ci w głowie?',
           maxLength: 30,
@@ -104,6 +131,7 @@ const ProjectForm = ({ type, mode, onType, activeProject }) => {
           label='Opis'
           inputStyle={{ minHeight: 120, paddingTop: 12 }}
           inputConfig={{
+            value: description,
             onChangeText: (text) => setDescription(text),
             multiline: true,
             textAlignVertical: 'top',
@@ -118,6 +146,7 @@ const ProjectForm = ({ type, mode, onType, activeProject }) => {
         onType={onType}
         onSubmit={formSubmitHandler}
         activeProject={activeProject}
+        backTo={dropdownValue}
       />
     </View>
   );

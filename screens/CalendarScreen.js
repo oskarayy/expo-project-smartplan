@@ -5,6 +5,7 @@ import { Styles } from '../constants/Styles';
 import { getDeadlineString } from '../utils/getDeadlineString';
 import DateBox from '../components/calendar/DateBox';
 import Blur from '../components/interface/Blur';
+import NoItemsFound from '../components/interface/NoItemsFound';
 
 const getCalendarList = (tasks) => {
   const compareNumbers = (a, b) => {
@@ -25,6 +26,9 @@ const getCalendarList = (tasks) => {
 
 const CalendarScreen = () => {
   const tasks = useSelector((state) => state.taskSlice.tasks);
+
+  if (tasks.length < 1) return <NoItemsFound />;
+
   const deadlines = getCalendarList(tasks);
 
   return (

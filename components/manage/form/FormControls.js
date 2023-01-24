@@ -1,22 +1,41 @@
 import { View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
 import { Colors } from '../../../constants/Colors';
 import { Fonts } from '../../../constants/Fonts';
 
 import Button from '../../interface/Button';
 
-const ProjectControls = ({ mode, type, onType, onSubmit, activeProject }) => {
+const ProjectControls = ({
+  mode,
+  type,
+  onType,
+  onSubmit,
+  activeProject,
+  backTo
+}) => {
   const navigation = useNavigation();
-  const goBackHandler = () => {
-    if (activeProject && type === 'task') {
+
+  const goBackHandler = (submit) => {
+    if ((activeProject || backTo) && type === 'task') {
       navigation.navigate('projects', {
         screen: 'projectDetail',
-        params: { id: activeProject }
+        params: { id: activeProject ?? backTo, submit }
+      });
+    } else if (
+      (submit === true || activeProject) &&
+      backTo &&
+      type === 'project'
+    ) {
+      navigation.navigate('projects', {
+        screen: 'projectsCategory',
+        params: {
+          id: backTo,
+          submit: true
+        }
       });
     } else if (activeProject && type === 'project') {
       navigation.navigate('projects', {
-        screen: 'projectList'
+        screen: 'projectsList'
       });
     } else {
       onType('');
@@ -25,6 +44,11 @@ const ProjectControls = ({ mode, type, onType, onSubmit, activeProject }) => {
         type: ''
       });
     }
+  };
+
+  const submitHandler = () => {
+    const validation = onSubmit();
+    if (validation.form) goBackHandler(true);
   };
 
   return (
@@ -47,7 +71,7 @@ const ProjectControls = ({ mode, type, onType, onSubmit, activeProject }) => {
         {mode === 'update' ? 'Anuluj' : 'Cofnij'}
       </Button>
       <Button
-        onPress={onSubmit}
+        onPress={submitHandler}
         style={{ flexBasis: '40%' }}
         buttonStyle={{
           borderWidth: 1,

@@ -1,26 +1,38 @@
-import React, { forwardRef, createRef, useState } from 'react';
 import { StyleSheet, View, Text, TextInput } from 'react-native';
 import { Colors } from '../../../constants/Colors';
 import { Fonts } from '../../../constants/Fonts';
 
-const FormItem = React.forwardRef(
-  ({ itemStyle, inputStyle, inputConfig, label, children }, ref) => {
-    return (
-      <View style={[styles.formItem, itemStyle]}>
+const FormItem = ({
+  itemStyle,
+  inputStyle,
+  inputConfig,
+  label,
+  children,
+  isValid = true
+}) => {
+  return (
+    <View style={[styles.formItem, itemStyle]}>
+      <View style={styles.labelContainer}>
         <Text style={styles.label}>{label}</Text>
-        {inputConfig && (
-          <TextInput
-            ref={ref}
-            style={[styles.textInput, inputStyle]}
-            placeholderTextColor={Colors.gray200}
-            {...inputConfig}
-          />
+        {!isValid && (
+          <Text style={[styles.label, styles.invalid]}>Wymagane pole</Text>
         )}
-        {children}
       </View>
-    );
-  }
-);
+      {inputConfig && (
+        <TextInput
+          style={[
+            styles.textInput,
+            inputStyle,
+            !isValid && styles.invalidInput
+          ]}
+          placeholderTextColor={isValid ? Colors.gray200 : Colors.gray400}
+          {...inputConfig}
+        />
+      )}
+      {children}
+    </View>
+  );
+};
 
 export default FormItem;
 
@@ -29,12 +41,20 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     zIndex: -1
   },
+  labelContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
   label: {
     ...Fonts.h4,
     marginLeft: 4,
     fontSize: 13,
     lineHeight: 30,
     color: Colors.gray400
+  },
+  invalid: {
+    color: '#EA372999',
+    fontSize: 10
   },
   textInput: {
     padding: 12,
@@ -45,5 +65,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray10,
     fontSize: 15,
     color: Colors.white
+  },
+  invalidInput: {
+    backgroundColor: '#EA372955',
+    borderColor: Colors.gray200
   }
 });

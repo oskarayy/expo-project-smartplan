@@ -26,6 +26,8 @@ const ProjectStatus = ({ progress, procent, prev }) => {
         numbersArr.length === 1
           ? +numbersArr[0]
           : +numbersArr[0] - +numbersArr[1];
+    } else if (procent === prev) {
+      barWidth = procent;
     }
 
     return {

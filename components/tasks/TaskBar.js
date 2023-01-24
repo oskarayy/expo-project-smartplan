@@ -1,10 +1,7 @@
 import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { toggleTaskState } from '../../store/reducers/taskSlice';
-import {
-  updateActiveTasks,
-  updateProject
-} from '../../store/reducers/projectSlice';
+import { removeTask, toggleTaskState } from '../../store/reducers/taskSlice';
+import { updateActiveTasks } from '../../store/reducers/projectSlice';
 
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
@@ -17,10 +14,11 @@ const TaskBar = ({ taskData, calendar }) => {
   const projects = useSelector((state) => state.projectSlice.projects);
   const categories = useSelector((state) => state.projectSlice.categories);
 
-  const activeProject = projects.find((item) => item.id === taskData.projectId);
-  const activeCategory = categories.find(
-    (item) => item.id === activeProject.category
-  );
+  const activeProject =
+    projects.find((item) => item.id === taskData.projectId) ?? {};
+
+  const activeCategory =
+    categories.find((item) => item.id === activeProject?.category) ?? {};
 
   const deadline = getDeadlineString(taskData.deadline, true);
 
@@ -29,35 +27,43 @@ const TaskBar = ({ taskData, calendar }) => {
     dispatch(
       updateActiveTasks({
         id: activeProject.id,
-        delta: taskData.finished ? -1 : 1
+        delta: taskData.finished ? -1 : 1,
+        mode: 'update'
       })
     );
   };
 
+  const removeTaskHandler = () => {
+    dispatch(
+      updateActiveTasks({
+        id: activeProject.id,
+        finished: taskData.finished ? 1 : 0,
+        active: taskData.finished ? 0 : 1
+      })
+    );
+    dispatch(removeTask({ mode: 'single', id: taskData.id }));
+  };
+
   return (
-    <Pressable onPress={updateProjectProgress}>
-      <View style={styles.bar}>
-        <View
-          style={[
-            {
-              flexBasis: '14%',
-              alignItems: 'center'
-            },
-            !calendar && { flexBasis: '10%' }
-          ]}>
+    <View style={styles.bar}>
+      <View
+        style={[
+          {
+            flexBasis: '14%',
+            alignItems: 'center'
+          },
+          !calendar && { flexBasis: '10%' }
+        ]}>
+        <Pressable onPress={updateProjectProgress}>
           <Ionicons
             name={calendar ? activeCategory.icon : 'star'}
-            size={calendar ? 26 : 12}
+            size={calendar ? 24 : 12}
             color={Colors.accent}
           />
-        </View>
-        <View style={{ flex: 1 }}>
-          {calendar && (
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.title}>{activeProject.title}</Text>
-              <Text style={styles.progress}>{activeProject.progress}%</Text>
-            </View>
-          )}
+        </Pressable>
+      </View>
+      <View style={{ flex: 1 }}>
+        <Pressable style={{ flex: 1 }} onPress={updateProjectProgress}>
           <Text
             style={[
               styles.task,
@@ -66,8 +72,28 @@ const TaskBar = ({ taskData, calendar }) => {
             {taskData.task}
           </Text>
           {!calendar && <Text style={styles.deadline}>{deadline}</Text>}
-        </View>
-        <View style={styles.checkbox}>
+          {calendar && (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text
+                style={[
+                  styles.title,
+                  calendar && { fontSize: 13, color: Colors.gray100 }
+                ]}>
+                {activeProject.title}
+              </Text>
+              <Text
+                style={[
+                  styles.progress,
+                  calendar && { fontSize: 9, color: Colors.gray100 }
+                ]}>
+                {activeProject.progress}%
+              </Text>
+            </View>
+          )}
+        </Pressable>
+      </View>
+      <View style={styles.checkbox}>
+        <Pressable onPress={updateProjectProgress}>
           <Ionicons
             name={
               taskData.finished
@@ -77,9 +103,18 @@ const TaskBar = ({ taskData, calendar }) => {
             size={calendar ? 26 : 24}
             color={taskData.finished ? Colors.accent : Colors.gray100}
           />
-        </View>
+        </Pressable>
       </View>
-    </Pressable>
+      <View style={styles.checkbox}>
+        <Pressable onPress={removeTaskHandler}>
+          <Ionicons
+            name='close'
+            size={calendar ? 26 : 24}
+            color={Colors.gray100}
+          />
+        </Pressable>
+      </View>
+    </View>
   );
 };
 
@@ -104,8 +139,8 @@ const styles = StyleSheet.create({
     color: Colors.white
   },
   task: {
-    ...Fonts.text300,
-    fontSize: 12,
+    ...Fonts.text400,
+    fontSize: 15,
     lineHeight: 20,
     marginBottom: 1
   },
@@ -121,6 +156,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1
   },
   checkbox: {
-    marginHorizontal: 8
+    marginRight: 8
   }
 });
