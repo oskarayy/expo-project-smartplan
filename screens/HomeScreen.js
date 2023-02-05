@@ -61,29 +61,29 @@ const HomeScreen = () => {
   return (
     <View style={styles.root}>
       <Topbar />
-      <Pressable onPress={runChartAnimation}>
+      <Pressable style={{ flex: 1 }} onPress={runChartAnimation}>
         <TaskOverview
           progress={progress}
           tasksOverall={tasksOverall}
           onOverall={setTasksOverall}
         />
-      </Pressable>
-      <View style={styles.projects}>
-        <Text style={styles.projectsTitle}>Projekty</Text>
-        <View style={styles.list}>
-          {categoriesToDisplay.map((item) => {
-            const procent = (categoriesStats[item.id] / tasks.length) * 100;
-            return (
-              <ProjectStatsItem
-                key={item.id}
-                item={item}
-                progress={progress}
-                procent={procent.toFixed()}
-              />
-            );
-          })}
+        <View style={styles.projects}>
+          <Text style={styles.projectsTitle}>Projekty</Text>
+          <View style={styles.list}>
+            {categoriesToDisplay.map((item) => {
+              const procent = (categoriesStats[item.id] / tasks.length) * 100;
+              return (
+                <ProjectStatsItem
+                  key={item.id}
+                  item={item}
+                  progress={progress}
+                  procent={procent.toFixed()}
+                />
+              );
+            })}
+          </View>
         </View>
-      </View>
+      </Pressable>
     </View>
   );
 };
