@@ -10,13 +10,14 @@ import DatePicker from './form/DatePicker';
 import DropdownPicker from './form/DropdownPicker';
 import FormItem from './form/FormItem';
 import FormControls from './form/FormControls';
-import { getFormattedDate } from '../../utils/getFormattedDate';
+import { useEffect } from 'react';
 
-const ProjectForm = ({ type, mode, onType, activeProject }) => {
+const ProjectForm = ({ type, mode, onType, activeProject = {} }) => {
   const dispatch = useDispatch();
   const todayFormatted = new Date().toISOString().slice(0, 10);
+  const defaultDDValue = activeProject.category ?? activeProject.id;
 
-  const [dropdownValue, setDropdownValue] = useState(activeProject ?? null);
+  const [dropdownValue, setDropdownValue] = useState(defaultDDValue ?? null);
   const [dropdownIsValid, setDropdownIsValid] = useState(true);
   const [date, setDate] = useState(todayFormatted);
   const [title, setTitle] = useState({
@@ -26,6 +27,7 @@ const ProjectForm = ({ type, mode, onType, activeProject }) => {
   const [description, setDescription] = useState('');
 
   const categories = useSelector((state) => state.projectSlice.categories);
+  const categoriesIds = categories.map((item) => item.id);
   const projects = useSelector((state) => state.projectSlice.projects);
 
   const categoryPickerData = categories
@@ -39,6 +41,23 @@ const ProjectForm = ({ type, mode, onType, activeProject }) => {
     label: item.title,
     value: item.id
   }));
+
+  useEffect(() => {
+    if (activeProject && mode === 'update' && type === 'project') {
+      setDropdownValue(activeProject.category);
+      setDate(activeProject.deadline);
+      setTitle((prevState) => ({ ...prevState, value: activeProject.title }));
+      setDescription(activeProject.desc ?? '');
+    }
+  }, [mode, type, projects, activeProject]);
+
+  useEffect(() => {
+    if (mode === 'add') {
+      setDescription('');
+      setTitle({ value: '', isValid: true });
+      setDate(todayFormatted);
+    }
+  }, [mode]);
 
   const formSubmitHandler = () => {
     const actualTimeMs = new Date().getTime();
@@ -71,7 +90,7 @@ const ProjectForm = ({ type, mode, onType, activeProject }) => {
           tasks: { ...tasks, active: tasks.active + 1 }
         })
       );
-    } else if (type === 'project') {
+    } else if (type === 'project' && mode === 'add') {
       const newProject = {
         id: `project-${dropdownValue}-${actualTimeMs}`,
         title: title.value.trim(),
@@ -82,6 +101,18 @@ const ProjectForm = ({ type, mode, onType, activeProject }) => {
         deadline: date
       };
       dispatch(addProject(newProject));
+    } else if (type === 'project' && mode === 'update') {
+      const isCategory = categoriesIds.includes(dropdownValue);
+      const updatedProject = {
+        id: activeProject.id,
+        title: title.value.trim(),
+        desc: description.trim(),
+        category: isCategory ? dropdownValue : activeProject.category,
+        progress: activeProject.progress,
+        tasks: activeProject.tasks,
+        deadline: date
+      };
+      dispatch(updateProject(updatedProject));
     }
 
     setDate(todayFormatted);
@@ -145,7 +176,7 @@ const ProjectForm = ({ type, mode, onType, activeProject }) => {
         type={type}
         onType={onType}
         onSubmit={formSubmitHandler}
-        activeProject={activeProject}
+        activeProjectId={activeProject.id}
         backTo={dropdownValue}
       />
     </View>

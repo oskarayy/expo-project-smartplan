@@ -10,30 +10,30 @@ const ProjectControls = ({
   type,
   onType,
   onSubmit,
-  activeProject,
+  activeProjectId,
   backTo
 }) => {
   const navigation = useNavigation();
 
   const goBackHandler = (submit) => {
-    if ((activeProject || backTo) && type === 'task') {
+    if (((activeProjectId || backTo) && type === 'task') || mode === 'update') {
       navigation.navigate('projects', {
         screen: 'projectDetail',
-        params: { id: activeProject ?? backTo, submit }
+        params: { id: activeProjectId ?? backTo, submit: true }
       });
     } else if (
-      (submit === true || activeProject) &&
+      (submit === true || activeProjectId) &&
       backTo &&
       type === 'project'
     ) {
       navigation.navigate('projects', {
         screen: 'projectsCategory',
         params: {
-          id: backTo,
+          id: backTo ?? activeProjectId,
           submit: true
         }
       });
-    } else if (activeProject && type === 'project') {
+    } else if (activeProjectId && type === 'project') {
       navigation.navigate('projects', {
         screen: 'projectsList'
       });

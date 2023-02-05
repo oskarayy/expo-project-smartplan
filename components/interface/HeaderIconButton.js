@@ -2,14 +2,14 @@ import { StyleSheet, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
 
-const HeaderIconButton = ({ style, icon, onPress }) => {
+const HeaderIconButton = ({ style, icon, size = 36, onPress }) => {
   return (
     <View style={[styles.button, style]}>
       <Pressable
         onPress={onPress}
         style={({ pressed }) => pressed && styles.pressed}>
         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-          <Ionicons name={icon} size={36} color={Colors.accent} />
+          <Ionicons name={icon} size={size} color={Colors.accent} />
         </View>
       </Pressable>
     </View>

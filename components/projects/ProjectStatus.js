@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text } from 'react-native';
-import { Colors } from '../../../constants/Colors';
-import { Fonts } from '../../../constants/Fonts';
+import { Colors } from '../../constants/Colors';
+import { Fonts } from '../../constants/Fonts';
 
 import Animated, {
   interpolate,
@@ -42,7 +42,9 @@ const ProjectStatus = ({ progress, procent, prev }) => {
           progress={progress}
           style={[styles.statusBar, animatedWidth]}></AnimatedView>
       </View>
-      <Text style={styles.procent}>{`${procent}%`}</Text>
+      <Text style={styles.procent}>{`${
+        Number.isNaN(procent) ? 0 : procent
+      }%`}</Text>
     </>
   );
 };
@@ -66,6 +68,9 @@ const styles = StyleSheet.create({
     ...Fonts.text300,
     color: Colors.gray300,
     fontSize: 9,
+    lineHeight: 9,
+    marginVertical: 2,
+    marginHorizontal: 4,
     textAlign: 'right'
   }
 });

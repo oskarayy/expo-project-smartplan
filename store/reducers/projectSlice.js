@@ -16,7 +16,6 @@ import { sendProjects } from '../../utils/storage';
 const projectSlice = createSlice({
   name: 'projects',
   initialState: {
-    // projects: Array.isArray(projects) ? projects : [],
     projects: [],
     categories
   },

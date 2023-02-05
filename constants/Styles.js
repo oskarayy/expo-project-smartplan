@@ -7,6 +7,10 @@ export const Styles = {
     paddingTop: 45,
     paddingHorizontal: 20
   },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   card: {
     paddingTop: 12,
     paddingBottom: 20,

@@ -1,21 +1,35 @@
 import { StyleSheet, View, Text } from 'react-native';
+import { useSelector } from 'react-redux';
+
 import { Ionicons } from '@expo/vector-icons';
 import { Fonts } from '../../constants/Fonts';
 import { Colors } from '../../constants/Colors';
+import { Styles } from '../../constants/Styles';
 
-const NoItemsFound = () => {
+const NoItemsFound = ({ itemsName, category }) => {
+  const categories = useSelector((state) => state.projectSlice.categories);
+  const categoryName = categories.find((item) => item.id === category)?.name;
+
   return (
     <View
       style={{
+        ...Styles.centered,
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         paddingBottom: 140
       }}>
       <Ionicons name='alert' size={36} color={Colors.accent} />
       <Text style={{ ...Fonts.h2, fontSize: 32 }}>Ehhh..</Text>
-      <Text style={{ ...Fonts.text400, marginVertical: 4, fontSize: 15 }}>
-        Nie zaplanowałeś jeszcze żadnych zadań?
+      <Text style={styles.info}>
+        Nie zaplanowałeś jeszcze żadnych {itemsName}
+        {category && (
+          <>
+            {' w kategorii'}
+            <Text style={styles.boldInfoText}>
+              {' ' + categoryName.toLowerCase()}
+            </Text>
+          </>
+        )}
+        ?
       </Text>
       <Text style={{ ...Fonts.text300, fontSize: 13 }}>Zacznij już teraz!</Text>
       <View style={{ alignItems: 'center', position: 'absolute', bottom: 150 }}>
@@ -41,4 +55,13 @@ const NoItemsFound = () => {
 
 export default NoItemsFound;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  info: {
+    ...Fonts.text400,
+    marginVertical: 8,
+    fontSize: 15,
+    lineHeight: 20,
+    textAlign: 'center'
+  },
+  boldInfoText: { ...Fonts.h4, fontSize: 15 }
+});

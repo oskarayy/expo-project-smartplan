@@ -8,6 +8,7 @@ import * as SplashScreen from 'expo-splash-screen';
 //data
 import { Provider } from 'react-redux';
 import { store } from './store';
+
 // design //
 import { Fonts } from './constants/Fonts';
 import { Colors } from './constants/Colors';

@@ -27,7 +27,7 @@ const getCalendarList = (tasks) => {
 const CalendarScreen = () => {
   const tasks = useSelector((state) => state.taskSlice.tasks);
 
-  if (tasks.length < 1) return <NoItemsFound />;
+  if (tasks.length < 1) return <NoItemsFound itemsName='zadań' />;
 
   const deadlines = getCalendarList(tasks);
 

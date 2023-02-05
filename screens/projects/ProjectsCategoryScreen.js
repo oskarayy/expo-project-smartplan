@@ -1,15 +1,14 @@
 import { useEffect, useLayoutEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, FlatList } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 
-import { Colors } from '../../constants/Colors';
 import { Styles } from '../../constants/Styles';
 
 import HeaderIconButton from '../../components/interface/HeaderIconButton';
-import ProjectsGrid from '../../components/home/projects-overview/ProjectsGrid';
 import Blur from '../../components/interface/Blur';
 import NoItemsFound from '../../components/interface/NoItemsFound';
+import ListItem from '../../components/projects/ListItem';
 
 const ProjectCategoryScreen = ({ route, navigation }) => {
   const projects = useSelector((state) => state.projectSlice.projects);
@@ -51,25 +50,22 @@ const ProjectCategoryScreen = ({ route, navigation }) => {
     );
   }
 
-  if (projectsToDisplay.length < 1) return <NoItemsFound />;
+  if (projectsToDisplay.length < 1)
+    return (
+      <NoItemsFound
+        itemsName='projektów'
+        category={activeCategory.id !== 'all' ? activeCategory.id : false}
+      />
+    );
 
   return (
     <View style={styles.root}>
-      <ProjectsGrid
-        progress={progress}
-        mainConfig={{
-          data: projectsToDisplay,
-          dateFormat: 'long',
-          numColumns: 1,
-          enhanced: true,
-          scroll: true,
-          itemStyle: styles.project,
-          containerStyle: styles.list,
-          dateStyle: { fontSize: 10 },
-          iconStyle: styles.icon,
-          titleStyle: { fontSize: 18 },
-          categoryStyle: { fontSize: 11 }
-        }}
+      <FlatList
+        data={projectsToDisplay}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <ListItem item={item} progress={progress} />}
+        scrollEnbled={true}
+        listStyle={styles.list}
       />
       <Blur />
     </View>
@@ -84,17 +80,8 @@ const styles = StyleSheet.create({
     paddingTop: 12
   },
   list: {
+    alignItems: 'stretch',
+    justifyContent: 'center',
     paddingBottom: 130
-  },
-  project: {
-    minHeight: 160,
-    backgroundColor: Colors.gray10,
-    paddingHorizontal: 16,
-    marginBottom: 12
-  },
-  icon: {
-    flexBasis: '12%',
-    marginRight: 4,
-    alignItems: 'center'
   }
 });

@@ -9,6 +9,7 @@ import ProjectForm from '../components/manage/ProjectForm';
 import { useSelector } from 'react-redux';
 
 const ManageScreen = ({ route, navigation }) => {
+  const projects = useSelector((state) => state.projectSlice.projects);
   const [activeMode, setActiveMode] = useState('add');
   const [activeType, setActiveType] = useState('');
   const { id: activeId, mode, type } = route.params;
@@ -24,10 +25,13 @@ const ManageScreen = ({ route, navigation }) => {
     });
   }, [activeMode, navigation]);
 
-  const activeHeaderTitle =
+  const activeAddHeaderTitle =
     activeType === 'project'
       ? 'Co nowego w planach?'
       : 'Jaki będzie kolejny krok?';
+
+  const activeUpdateHeaderTitle = 'Mała zmiana planów?';
+
   const activeHeaderIcon = activeType === 'project' ? 'rocket' : 'star';
 
   if (activeType === '' && activeMode === 'add')
@@ -37,19 +41,24 @@ const ManageScreen = ({ route, navigation }) => {
       </View>
     );
 
+  const activeProject = projects.find((project) => project.id === activeId);
+
   return (
     <View style={styles.root}>
       <View style={{ flex: 1, justifyContent: 'center' }}>
         <View style={{ alignItems: 'center' }}>
           <Ionicons name={activeHeaderIcon} size={30} color={Colors.accent} />
-          <Text style={styles.title}>{activeHeaderTitle}</Text>
+          <Text style={styles.title}>
+            {activeMode === 'add'
+              ? activeAddHeaderTitle
+              : activeUpdateHeaderTitle}
+          </Text>
         </View>
         <ProjectForm
           type={activeType}
           mode={activeMode}
           onType={setActiveType}
-          activeProject={activeId}
-          // onSend={sendDataHandler}
+          activeProject={activeProject}
         />
       </View>
     </View>

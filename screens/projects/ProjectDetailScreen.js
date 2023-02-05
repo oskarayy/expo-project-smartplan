@@ -9,7 +9,7 @@ import { Styles } from '../../constants/Styles';
 import { Ionicons } from '@expo/vector-icons';
 import { getFormattedDate } from '../../utils/getFormattedDate';
 
-import ProjectStatus from '../../components/home/projects-overview/ProjectStatus';
+import ProjectStatus from '../../components/projects/ProjectStatus';
 import TaskBar from '../../components/tasks/TaskBar';
 import Blur from '../../components/interface/Blur';
 import HeaderIconButton from '../../components/interface/HeaderIconButton';
@@ -21,7 +21,7 @@ const ProjectDetailScreen = ({ route, navigation }) => {
 
   const projectId = route.params.id;
   const project = projects.find((item) => item.id === projectId) ?? {};
-  const category = categories.find((cat) => cat.id === project.category);
+  const category = categories.find((cat) => cat.id === project.category) ?? {};
   const progress = useSharedValue(0);
   const getTaskTime = (task) => new Date(task.deadline).getTime();
 
@@ -38,23 +38,33 @@ const ProjectDetailScreen = ({ route, navigation }) => {
   if (projectDeadline.getTime() < lastTaskDeadline.getTime())
     deadline = getFormattedDate(lastTaskDeadline, 'long');
 
+  const newTaskButtonHandler = () => {
+    navigation.navigate('manage', {
+      mode: 'add',
+      type: 'task',
+      id: projectId
+    });
+  };
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: project.title ?? 'Projekt',
       headerRight: () => (
         <HeaderIconButton
-          icon='add'
+          icon='pencil'
+          size={24}
+          style={{ paddingRight: 12 }}
           onPress={() =>
             navigation.navigate('manage', {
-              mode: 'add',
-              type: 'task',
+              mode: 'update',
+              type: 'project',
               id: projectId
             })
           }
         />
       )
     });
-  }, []);
+  }, [project]);
 
   useEffect(() => {
     progress.value = 0;
@@ -84,20 +94,18 @@ const ProjectDetailScreen = ({ route, navigation }) => {
           <Text style={styles.desc}>{project.desc}</Text>
         )}
         {(!project.desc || project.desc?.length === 0) && (
-          <Text style={[styles.desc, styles.nocontent]}>
+          <Text style={[styles.desc, { color: Colors.gray300 }]}>
             Nie dodano jeszcze opisu projektu
           </Text>
         )}
         <View style={styles.tasksBox}>
-          <Text style={styles.tasks}>Zadania</Text>
+          <TaskBar onNewTask={newTaskButtonHandler} />
           {tasksInOrder.length > 0 &&
             tasksInOrder.map((task) => (
               <TaskBar key={task.id} taskData={task} />
             ))}
           {tasksInOrder.length === 0 && (
-            <Text style={styles.nocontent}>
-              Nie dodano jeszcze żadnych zadań
-            </Text>
+            <Text style={styles.notasks}>Nie dodano jeszcze żadnych zadań</Text>
           )}
         </View>
       </ScrollView>
@@ -136,13 +144,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 24,
     fontSize: 15,
-    color: Colors.gray500
-  },
-  nocontent: {
-    ...Styles.desc,
-    marginTop: 12,
-    fontSize: 15,
-    color: Colors.gray300,
+    color: Colors.gray500,
     textAlign: 'center'
   },
   tasksBox: {
@@ -153,6 +155,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 2,
     fontSize: 16,
+    textAlign: 'center'
+  },
+  notasks: {
+    ...Styles.desc,
+    marginTop: 16,
+    fontSize: 14,
+    color: Colors.gray300,
     textAlign: 'center'
   }
 });

@@ -9,7 +9,7 @@ import { Fonts } from '../../constants/Fonts';
 
 import { getDeadlineString } from '../../utils/getDeadlineString';
 
-const TaskBar = ({ taskData, calendar }) => {
+const TaskBar = ({ taskData = {}, calendar, onNewTask }) => {
   const dispatch = useDispatch();
   const projects = useSelector((state) => state.projectSlice.projects);
   const categories = useSelector((state) => state.projectSlice.categories);
@@ -44,16 +44,23 @@ const TaskBar = ({ taskData, calendar }) => {
     dispatch(removeTask({ mode: 'single', id: taskData.id }));
   };
 
+  if (onNewTask)
+    return (
+      <Pressable
+        style={({ pressed }) => pressed && { opacity: 0.7 }}
+        onPress={onNewTask}>
+        <View style={[styles.bar, styles.taskBarButton]}>
+          <Text
+            style={[styles.title, { marginRight: 0, color: Colors.accent }]}>
+            Dodaj zadanie
+          </Text>
+        </View>
+      </Pressable>
+    );
+
   return (
     <View style={styles.bar}>
-      <View
-        style={[
-          {
-            flexBasis: '14%',
-            alignItems: 'center'
-          },
-          !calendar && { flexBasis: '10%' }
-        ]}>
+      <View style={[styles.iconBox, !calendar && { flexBasis: '10%' }]}>
         <Pressable onPress={updateProjectProgress}>
           <Ionicons
             name={calendar ? activeCategory.icon : 'star'}
@@ -64,28 +71,17 @@ const TaskBar = ({ taskData, calendar }) => {
       </View>
       <View style={{ flex: 1 }}>
         <Pressable style={{ flex: 1 }} onPress={updateProjectProgress}>
-          <Text
-            style={[
-              styles.task,
-              !calendar && { fontSize: 15, color: Colors.white }
-            ]}>
+          <Text style={[styles.task, !calendar && styles.calendarTask]}>
             {taskData.task}
           </Text>
           {!calendar && <Text style={styles.deadline}>{deadline}</Text>}
           {calendar && (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text
-                style={[
-                  styles.title,
-                  calendar && { fontSize: 13, color: Colors.gray100 }
-                ]}>
+              <Text style={[styles.title, calendar && styles.calendarTitle]}>
                 {activeProject.title}
               </Text>
               <Text
-                style={[
-                  styles.progress,
-                  calendar && { fontSize: 9, color: Colors.gray100 }
-                ]}>
+                style={[styles.progress, calendar && styles.calendarProgress]}>
                 {activeProject.progress}%
               </Text>
             </View>
@@ -131,6 +127,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: Colors.gray10
   },
+  taskBarButton: {
+    flexDirection: 'column',
+    backgroundColor: Colors.gray10,
+    borderWidth: 1.5,
+    borderColor: Colors.accent
+  },
+  iconBox: { flexBasis: '14%', alignItems: 'center' },
   title: {
     ...Fonts.h3,
     marginBottom: 2,
@@ -138,12 +141,14 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: Colors.white
   },
+  calendarTitle: { fontSize: 13, color: Colors.gray100 },
   task: {
     ...Fonts.text400,
     fontSize: 15,
     lineHeight: 20,
     marginBottom: 1
   },
+  calendarTask: { fontSize: 15, color: Colors.white },
   deadline: {
     fontSize: 11,
     lineHeight: 15,
@@ -155,6 +160,7 @@ const styles = StyleSheet.create({
     color: Colors.accent,
     letterSpacing: 0.1
   },
+  calendarProgress: { fontSize: 9, color: Colors.gray100 },
   checkbox: {
     marginRight: 8
   }
