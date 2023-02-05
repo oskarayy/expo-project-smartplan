@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { StyleSheet, View, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import * as Notifications from 'expo-notifications';
+
 import { checkProjectValues } from '../../utils/checkFromValues';
 import { addProject, updateProject } from '../../store/reducers/projectSlice';
 import { addTask } from '../../store/reducers/taskSlice';
@@ -42,6 +44,13 @@ const ProjectForm = ({ type, mode, onType, activeProject = {} }) => {
     value: item.id
   }));
 
+  const newNotificationHandler = async (title, body, data, trigger) => {
+    return await Notifications.scheduleNotificationAsync({
+      content: { title, body, data },
+      trigger
+    });
+  };
+
   useEffect(() => {
     if (activeProject && mode === 'update' && type === 'project') {
       setDropdownValue(activeProject.category);
@@ -59,7 +68,7 @@ const ProjectForm = ({ type, mode, onType, activeProject = {} }) => {
     }
   }, [mode]);
 
-  const formSubmitHandler = () => {
+  const formSubmitHandler = async () => {
     const actualTimeMs = new Date().getTime();
     const validation = checkProjectValues({
       titleValue: title.value,
@@ -73,9 +82,8 @@ const ProjectForm = ({ type, mode, onType, activeProject = {} }) => {
     }
 
     if (type === 'task') {
-      const { tasks } = projects.find(
-        (project) => project.id === dropdownValue
-      );
+      const project = projects.find((project) => project.id === dropdownValue);
+      const { tasks } = project;
       const newTask = {
         id: `${dropdownValue}-task-${actualTimeMs}`,
         task: title.value.trim(),
@@ -83,13 +91,19 @@ const ProjectForm = ({ type, mode, onType, activeProject = {} }) => {
         deadline: date,
         finished: false
       };
-      dispatch(addTask(newTask));
+      const notificationId = await newNotificationHandler(
+        newTask.task,
+        'Projekt: ' + project.title,
+        { taskId: newTask.id },
+        { hour: 8, repeats: true }
+      );
       dispatch(
         updateProject({
           id: dropdownValue,
           tasks: { ...tasks, active: tasks.active + 1 }
         })
       );
+      dispatch(addTask({ ...newTask, notificationId }));
     } else if (type === 'project' && mode === 'add') {
       const newProject = {
         id: `project-${dropdownValue}-${actualTimeMs}`,

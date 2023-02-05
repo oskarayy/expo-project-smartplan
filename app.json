@@ -11,6 +11,15 @@
       "resizeMode": "cover",
       "backgroundColor": "#000"
     },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./asssets/cmimage.png",
+          "color": "#ffffff"
+        }
+      ]
+    ],
     "updates": {
       "fallbackToCacheTimeout": 0
     },

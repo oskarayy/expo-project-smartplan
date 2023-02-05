@@ -46,8 +46,8 @@ const ProjectControls = ({
     }
   };
 
-  const submitHandler = () => {
-    const validation = onSubmit();
+  const submitHandler = async () => {
+    const validation = await onSubmit();
     if (validation.form) goBackHandler(true);
   };
 

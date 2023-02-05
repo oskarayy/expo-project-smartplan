@@ -49,7 +49,7 @@ const TaskOverview = ({ progress, tasksOverall, onOverall }) => {
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-        <Text style={styles.title}>Zadania</Text>
+        <Text style={styles.title}>Dzisiaj</Text>
         <Ionicons
           name='ribbon-outline'
           size={26}

@@ -5,6 +5,18 @@ import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 
+//notifications
+import * as Notifications from 'expo-notifications';
+Notifications.setNotificationHandler({
+  handleNotification: async () => {
+    return {
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowAlert: true
+    };
+  }
+});
+
 //data
 import { Provider } from 'react-redux';
 import { store } from './store';
@@ -201,9 +213,19 @@ const Dashboard = () => {
 };
 
 export default function App() {
-  // const dataReady = getDataFromStorage();
-
-  // console.log(dataReady);
+  const requestPermissionsAsync = async () => {
+    if (Platform.OS === 'ios') {
+      const settings = await Notifications.getPermissionsAsync();
+      // console.log(settings);
+      return (
+        settings.granted ||
+        settings.ios?.status ===
+          Notifications.IosAuthorizationStatus.PROVISIONAL
+      );
+    } else if (Platform.OS === 'android') {
+      // Permissions.askAsync(Permissions.NOTIFICATIONS);
+    }
+  };
 
   const [fontsLoaded] = useFonts({
     Mulish_300Light,
@@ -211,6 +233,8 @@ export default function App() {
     Exo2_600SemiBold,
     Exo2_700Bold
   });
+
+  requestPermissionsAsync();
 
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync();

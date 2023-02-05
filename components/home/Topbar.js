@@ -23,7 +23,7 @@ const Topbar = () => {
             // color: Colors.gray10,
             color: '#ffffff'
           }}>
-          Jak Ci dzisiaj idzie?
+          Jak tam Twoje postępy?
         </Text>
       </View>
       <View>

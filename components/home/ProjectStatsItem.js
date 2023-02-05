@@ -1,7 +1,6 @@
-import { StyleSheet, View, Text, Pressable } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
-import { Styles } from '../../constants/Styles';
 
 import ProjectStatus from '../projects/ProjectStatus';
 
@@ -10,13 +9,6 @@ const ProjectStatsItem = ({ item, progress, stats }) => {
   const finishedTasks = stats[item.id]['finished'];
 
   const procent = (100 / (activeTasks + finishedTasks)) * finishedTasks;
-
-  // console.log(
-  //   item.id,
-  //   activeTasks,
-  //   finishedTasks,
-  //   procent.toString() === 'NaN' ? 0 : procent.toFixed()
-  // );
 
   return (
     <View style={styles.item}>
@@ -46,6 +38,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 16,
     marginTop: 4,
+    marginRight: 4,
     alignItems: 'center',
     justifyContent: 'space-between'
   }
