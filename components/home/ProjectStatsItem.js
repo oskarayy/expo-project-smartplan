@@ -5,12 +5,28 @@ import { Styles } from '../../constants/Styles';
 
 import ProjectStatus from '../projects/ProjectStatus';
 
-const ProjectStatsItem = ({ item, progress, procent }) => {
+const ProjectStatsItem = ({ item, progress, stats }) => {
+  const activeTasks = stats[item.id]['active'];
+  const finishedTasks = stats[item.id]['finished'];
+
+  const procent = (100 / (activeTasks + finishedTasks)) * finishedTasks;
+
+  // console.log(
+  //   item.id,
+  //   activeTasks,
+  //   finishedTasks,
+  //   procent.toString() === 'NaN' ? 0 : procent.toFixed()
+  // );
+
   return (
     <View style={styles.item}>
       <Ionicons name={item.icon} size={24} color={Colors.accent} />
       <View style={styles.progress}>
-        <ProjectStatus progress={progress} procent={procent} />
+        <ProjectStatus
+          progress={progress}
+          procent={procent.toString() === 'NaN' ? 0 : procent.toFixed()}
+          prev={0}
+        />
       </View>
     </View>
   );

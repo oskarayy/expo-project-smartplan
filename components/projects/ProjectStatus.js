@@ -43,7 +43,7 @@ const ProjectStatus = ({ progress, procent, prev }) => {
           style={[styles.statusBar, animatedWidth]}></AnimatedView>
       </View>
       <Text style={styles.procent}>{`${
-        Number.isNaN(procent) ? 0 : procent
+        procent.toString() === 'NaN' ? 0 : procent
       }%`}</Text>
     </>
   );

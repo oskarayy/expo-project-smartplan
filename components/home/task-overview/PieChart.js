@@ -7,8 +7,8 @@ import { Colors, ChartColors } from '../../../constants/Colors';
 import { Styles } from '../../../constants/Styles';
 import { Fonts } from '../../../constants/Fonts';
 
-const size = 140;
-const strokeWidth = 20;
+const size = 120;
+const strokeWidth = 18;
 const colors = Object.values(ChartColors);
 
 const PieChart = ({ children, stats, overall, progress }) => {

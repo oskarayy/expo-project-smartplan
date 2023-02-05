@@ -10,20 +10,34 @@ import Topbar from '../components/home/Topbar';
 import TaskOverview from '../components/home/task-overview/TaskOverview';
 import ProjectStatsItem from '../components/home/ProjectStatsItem';
 
-const defaultCategoriesStats = {
-  love: 0,
-  health: 0,
-  career: 0,
-  finances: 0,
-  soul: 0,
-  relations: 0
-};
-
 const HomeScreen = () => {
   const [tasksOverall, setTasksOverall] = useState(1);
-  const [categoriesStats, setCategoriesStats] = useState(
-    defaultCategoriesStats
-  );
+  const [categoriesStats, setCategoriesStats] = useState({
+    love: {
+      active: 0,
+      finished: 0
+    },
+    health: {
+      active: 0,
+      finished: 0
+    },
+    career: {
+      active: 0,
+      finished: 0
+    },
+    finances: {
+      active: 0,
+      finished: 0
+    },
+    soul: {
+      active: 0,
+      finished: 0
+    },
+    relations: {
+      active: 0,
+      finished: 0
+    }
+  });
   const progress = useSharedValue(0);
 
   const tasks = useSelector((state) => state.taskSlice.tasks);
@@ -33,16 +47,47 @@ const HomeScreen = () => {
   const categoriesToDisplay = categories.filter((item) => item.id !== 'all');
 
   const countCategoriesStats = () => {
-    const newStats = tasks.reduce((acc, item) => {
-      const activeTaskProject = projects.find(
-        (pro) => pro.id === item.projectId
-      );
-      const activeTaskCategory = activeTaskProject.category;
-      acc[activeTaskCategory]++;
-      return acc;
-    }, defaultCategoriesStats);
+    const newStats = tasks.reduce(
+      (acc, item) => {
+        const activeTaskProject = projects.find(
+          (pro) => pro.id === item.projectId
+        );
+        const activeTaskCategory = activeTaskProject.category;
 
-    setCategoriesStats(newStats);
+        if (item.finished) acc[activeTaskCategory]['finished']++;
+        else acc[activeTaskCategory]['active']++;
+
+        return acc;
+      },
+      {
+        love: {
+          active: 0,
+          finished: 0
+        },
+        health: {
+          active: 0,
+          finished: 0
+        },
+        career: {
+          active: 0,
+          finished: 0
+        },
+        finances: {
+          active: 0,
+          finished: 0
+        },
+        soul: {
+          active: 0,
+          finished: 0
+        },
+        relations: {
+          active: 0,
+          finished: 0
+        }
+      }
+    );
+
+    setCategoriesStats((prevState) => newStats);
   };
 
   const runChartAnimation = () => {
@@ -58,6 +103,7 @@ const HomeScreen = () => {
     runChartAnimation();
   }, [tasks]);
 
+  // console.log(categoriesStats);
   return (
     <View style={styles.root}>
       <Topbar />
@@ -71,13 +117,12 @@ const HomeScreen = () => {
           <Text style={styles.projectsTitle}>Projekty</Text>
           <View style={styles.list}>
             {categoriesToDisplay.map((item) => {
-              const procent = (categoriesStats[item.id] / tasks.length) * 100;
               return (
                 <ProjectStatsItem
                   key={item.id}
                   item={item}
+                  stats={categoriesStats}
                   progress={progress}
-                  procent={procent.toFixed()}
                 />
               );
             })}
