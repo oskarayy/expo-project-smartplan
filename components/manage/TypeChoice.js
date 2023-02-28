@@ -1,11 +1,13 @@
 import { StyleSheet, View, Text, Pressable } from 'react-native';
+import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Colors } from '../../constants/Colors';
 import { Fonts } from '../../constants/Fonts';
-import { Styles } from '../../constants/Styles';
 
 const TypeChoice = ({ onType }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
+
   return (
     <View
       style={{
@@ -16,7 +18,7 @@ const TypeChoice = ({ onType }) => {
         style={({ pressed }) => pressed && { opacity: 0.7 }}
         onPress={() => onType('project')}>
         <View style={styles.choice}>
-          <Ionicons name='rocket' size={28} color={Colors.accent} />
+          <Ionicons name='rocket' size={28} color={accentColor} />
           <Text style={styles.choiceText}>Projekt</Text>
         </View>
       </Pressable>
@@ -24,7 +26,7 @@ const TypeChoice = ({ onType }) => {
         style={({ pressed }) => pressed && { opacity: 0.7 }}
         onPress={() => onType('task')}>
         <View style={styles.choice}>
-          <Ionicons name='star' size={28} color={Colors.accent} />
+          <Ionicons name='star' size={28} color={accentColor} />
           <Text style={styles.choiceText}>Zadanie</Text>
         </View>
       </Pressable>

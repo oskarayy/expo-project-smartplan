@@ -1,9 +1,12 @@
 import { StyleSheet, View, Text, Pressable } from 'react-native';
+import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
 import { Fonts } from '../../constants/Fonts';
 
 const Category = ({ name, icon, onPress, id }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
+
   return (
     <View style={styles.catBox} id={id}>
       <Pressable
@@ -11,11 +14,11 @@ const Category = ({ name, icon, onPress, id }) => {
         style={({ pressed }) => pressed && { opacity: 0.7 }}>
         <View style={styles.cat}>
           <View style={styles.label}>
-            <Ionicons name={icon} size={22} color={Colors.accent} />
+            <Ionicons name={icon} size={22} color={accentColor} />
             <Text style={styles.name}>{name.toUpperCase()}</Text>
           </View>
           <View>
-            <Ionicons name='chevron-forward' size={20} color={Colors.accent} />
+            <Ionicons name='chevron-forward' size={20} color={accentColor} />
           </View>
         </View>
       </Pressable>

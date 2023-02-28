@@ -6,6 +6,7 @@ import { Fonts } from '../constants/Fonts';
 
 import { setTasks } from '../store/reducers/taskSlice';
 import { setProjects } from '../store/reducers/projectSlice';
+import { updateOptions } from '../store/reducers/settingsSlice';
 import { getData } from '../utils/storage';
 
 const cmImage = require('../assets/cmimage.png');
@@ -17,9 +18,15 @@ const Welcome = ({ navigation }) => {
   const getDataFromStorage = async () => {
     const projects = await getData('projects');
     const tasks = await getData('tasks');
+    const settings = await getData('settings');
 
     if (Array.isArray(projects)) dispatch(setProjects(projects));
     if (Array.isArray(tasks)) dispatch(setTasks(tasks));
+    if (
+      Array.isArray(settings.notificationsTime) &&
+      settings.accentColor.length === 7
+    )
+      dispatch(updateOptions(settings));
   };
 
   getDataFromStorage();

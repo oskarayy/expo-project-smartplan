@@ -1,15 +1,17 @@
 import { StyleSheet, View, Pressable } from 'react-native';
+import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/Colors';
 
 const HeaderIconButton = ({ style, icon, size = 36, onPress }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
+
   return (
     <View style={[styles.button, style]}>
       <Pressable
         onPress={onPress}
         style={({ pressed }) => pressed && styles.pressed}>
         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-          <Ionicons name={icon} size={size} color={Colors.accent} />
+          <Ionicons name={icon} size={size} color={accentColor} />
         </View>
       </Pressable>
     </View>

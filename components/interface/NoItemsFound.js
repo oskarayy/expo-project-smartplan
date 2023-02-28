@@ -7,6 +7,7 @@ import { Colors } from '../../constants/Colors';
 import { Styles } from '../../constants/Styles';
 
 const NoItemsFound = ({ itemsName, category }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
   const categories = useSelector((state) => state.projectSlice.categories);
   const categoryName = categories.find((item) => item.id === category)?.name;
 
@@ -17,7 +18,7 @@ const NoItemsFound = ({ itemsName, category }) => {
         flex: 1,
         paddingBottom: 140
       }}>
-      <Ionicons name='alert' size={36} color={Colors.accent} />
+      <Ionicons name='alert' size={36} color={accentColor} />
       <Text style={{ ...Fonts.h2, fontSize: 32 }}>Ehhh..</Text>
       <Text style={styles.info}>
         Nie zaplanowałeś jeszcze żadnych {itemsName}

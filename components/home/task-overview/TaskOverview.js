@@ -10,6 +10,7 @@ import { Fonts } from '../../../constants/Fonts';
 import PieChart from './PieChart';
 
 const TaskOverview = ({ progress, tasksOverall, onOverall }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
   const tasks = useSelector((state) => state.taskSlice.tasks);
   const today = new Date().toISOString().slice(0, 10);
 
@@ -53,7 +54,7 @@ const TaskOverview = ({ progress, tasksOverall, onOverall }) => {
         <Ionicons
           name='ribbon-outline'
           size={26}
-          color={allTodayTasksFinished ? Colors.accent : Colors.gray200}
+          color={allTodayTasksFinished ? accentColor : Colors.gray200}
         />
       </View>
       <View style={styles.chart}>

@@ -7,6 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 
 //notifications
 import * as Notifications from 'expo-notifications';
+
 Notifications.setNotificationHandler({
   handleNotification: async () => {
     return {
@@ -18,7 +19,7 @@ Notifications.setNotificationHandler({
 });
 
 //data
-import { Provider } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import { store } from './store';
 
 // design //
@@ -56,6 +57,8 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const BigCustomTabBarButton = ({ children, onPress }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
+
   return (
     <Pressable
       onPress={onPress}
@@ -69,7 +72,7 @@ const BigCustomTabBarButton = ({ children, onPress }) => {
           height: 70,
           width: 70,
           borderRadius: 35,
-          backgroundColor: Colors.accent,
+          backgroundColor: accentColor,
           justifyContent: 'center',
           alignItems: 'center'
         }}>

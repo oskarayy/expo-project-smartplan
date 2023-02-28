@@ -95,7 +95,7 @@ const ProjectForm = ({ type, mode, onType, activeProject = {} }) => {
         newTask.task,
         'Projekt: ' + project.title,
         { taskId: newTask.id },
-        { hour: 8, repeats: true }
+        { hour: 8, minute: 0, repeats: true }
       );
       dispatch(
         updateProject({
@@ -155,7 +155,7 @@ const ProjectForm = ({ type, mode, onType, activeProject = {} }) => {
           label='Termin'
           itemStyle={Platform.OS === 'android' && { flex: 1 }}>
           <View style={styles.dateInput}>
-            <DatePicker date={date} onDate={setDate} />
+            <DatePicker date={date} onValue={setDate} type='date' />
           </View>
         </FormItem>
       </View>

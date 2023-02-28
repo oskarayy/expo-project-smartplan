@@ -1,10 +1,13 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
+import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
 
 import ProjectStatus from '../projects/ProjectStatus';
+import { Fonts } from '../../constants/Fonts';
 
 const ProjectStatsItem = ({ item, progress, stats }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
   const activeTasks = stats[item.id]['active'];
   const finishedTasks = stats[item.id]['finished'];
 
@@ -12,13 +15,17 @@ const ProjectStatsItem = ({ item, progress, stats }) => {
 
   return (
     <View style={styles.item}>
-      <Ionicons name={item.icon} size={24} color={Colors.accent} />
+      <Ionicons name={item.icon} size={24} color={accentColor} />
       <View style={styles.progress}>
-        <ProjectStatus
-          progress={progress}
-          procent={procent.toString() === 'NaN' ? 0 : procent.toFixed()}
-          prev={0}
-        />
+        {procent.toString() === 'NaN' ? (
+          <Text style={styles.noTasksText}>Brak aktywnych zadań</Text>
+        ) : (
+          <ProjectStatus
+            progress={progress}
+            procent={procent.toFixed()}
+            prev={0}
+          />
+        )}
       </View>
     </View>
   );
@@ -41,5 +48,12 @@ const styles = StyleSheet.create({
     marginRight: 4,
     alignItems: 'center',
     justifyContent: 'space-between'
+  },
+  noTasksText: {
+    ...Fonts.text300,
+    width: '100%',
+    textAlign: 'center',
+    color: Colors.gray300,
+    fontSize: 12
   }
 });

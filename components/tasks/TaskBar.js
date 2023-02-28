@@ -2,6 +2,7 @@ import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { removeTask, toggleTaskState } from '../../store/reducers/taskSlice';
 import { updateActiveTasks } from '../../store/reducers/projectSlice';
+import * as Notifications from 'expo-notifications';
 
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
@@ -11,6 +12,9 @@ import { getDeadlineString } from '../../utils/getDeadlineString';
 
 const TaskBar = ({ taskData = {}, calendar, onNewTask }) => {
   const dispatch = useDispatch();
+  const { accentColor, notificationsTime } = useSelector(
+    (state) => state.settingsSlice.options
+  );
   const projects = useSelector((state) => state.projectSlice.projects);
   const categories = useSelector((state) => state.projectSlice.categories);
 
@@ -22,7 +26,14 @@ const TaskBar = ({ taskData = {}, calendar, onNewTask }) => {
 
   const deadline = getDeadlineString(taskData.deadline, true);
 
-  const updateProjectProgress = () => {
+  const newNotificationHandler = async (title, body, data, trigger) => {
+    return await Notifications.scheduleNotificationAsync({
+      content: { title, body, data },
+      trigger
+    });
+  };
+
+  const updateProjectProgress = async () => {
     dispatch(toggleTaskState(taskData.id));
     dispatch(
       updateActiveTasks({
@@ -31,9 +42,28 @@ const TaskBar = ({ taskData = {}, calendar, onNewTask }) => {
         mode: 'update'
       })
     );
+
+    /// DO OGARNIĘCIA !!!
+
+    if (!taskData.finished)
+      await Notifications.cancelScheduledNotificationAsync(
+        taskData.notificationId
+      );
+    if (taskData.finished) {
+      await newNotificationHandler(
+        taskData.task,
+        'Projekt: ' + activeProject.title,
+        { taskId: taskData.id },
+        {
+          hour: +notificationsTime[0],
+          minute: +notificationsTime[1],
+          repeats: true
+        }
+      );
+    }
   };
 
-  const removeTaskHandler = () => {
+  const removeTaskHandler = async () => {
     dispatch(
       updateActiveTasks({
         id: activeProject.id,
@@ -42,6 +72,9 @@ const TaskBar = ({ taskData = {}, calendar, onNewTask }) => {
       })
     );
     dispatch(removeTask({ mode: 'single', id: taskData.id }));
+    return await Notifications.cancelScheduledNotificationAsync(
+      taskData.notificationId
+    );
   };
 
   if (onNewTask)
@@ -49,9 +82,13 @@ const TaskBar = ({ taskData = {}, calendar, onNewTask }) => {
       <Pressable
         style={({ pressed }) => pressed && { opacity: 0.7 }}
         onPress={onNewTask}>
-        <View style={[styles.bar, styles.taskBarButton]}>
-          <Text
-            style={[styles.title, { marginRight: 0, color: Colors.accent }]}>
+        <View
+          style={[
+            styles.bar,
+            styles.taskBarButton,
+            { borderColor: accentColor }
+          ]}>
+          <Text style={[styles.title, { marginRight: 0, color: accentColor }]}>
             Dodaj zadanie
           </Text>
         </View>
@@ -65,7 +102,7 @@ const TaskBar = ({ taskData = {}, calendar, onNewTask }) => {
           <Ionicons
             name={calendar ? activeCategory.icon : 'star'}
             size={calendar ? 24 : 12}
-            color={Colors.accent}
+            color={accentColor}
           />
         </Pressable>
       </View>
@@ -81,7 +118,11 @@ const TaskBar = ({ taskData = {}, calendar, onNewTask }) => {
                 {activeProject.title}
               </Text>
               <Text
-                style={[styles.progress, calendar && styles.calendarProgress]}>
+                style={[
+                  styles.progress,
+                  calendar && styles.calendarProgress,
+                  { color: accentColor }
+                ]}>
                 {activeProject.progress}%
               </Text>
             </View>
@@ -97,7 +138,7 @@ const TaskBar = ({ taskData = {}, calendar, onNewTask }) => {
                 : 'checkmark-circle-outline'
             }
             size={calendar ? 26 : 24}
-            color={taskData.finished ? Colors.accent : Colors.gray100}
+            color={taskData.finished ? accentColor : Colors.gray100}
           />
         </Pressable>
       </View>
@@ -130,8 +171,7 @@ const styles = StyleSheet.create({
   taskBarButton: {
     flexDirection: 'column',
     backgroundColor: Colors.gray10,
-    borderWidth: 1.5,
-    borderColor: Colors.accent
+    borderWidth: 1.5
   },
   iconBox: { flexBasis: '14%', alignItems: 'center' },
   title: {
@@ -157,7 +197,6 @@ const styles = StyleSheet.create({
   progress: {
     ...Fonts.text400,
     fontSize: 11,
-    color: Colors.accent,
     letterSpacing: 0.1
   },
   calendarProgress: { fontSize: 9, color: Colors.gray100 },

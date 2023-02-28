@@ -7,7 +7,7 @@ import { getFormattedDate } from '../../utils/getFormattedDate';
 
 import ProjectStatus from './ProjectStatus';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { removeProject } from '../../store/reducers/projectSlice';
 import { removeTask } from '../../store/reducers/taskSlice';
 import ListItemActions from './ListItemActions';
@@ -33,6 +33,7 @@ const categoriesPL = {
 const ListItem = ({ item, progress }) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
 
   const openProjectHandler = () => {
     navigation.navigate('projects', {
@@ -60,7 +61,7 @@ const ListItem = ({ item, progress }) => {
             <Ionicons
               name={icons[item.category]}
               size={24}
-              color={Colors.accent}
+              color={accentColor}
             />
           </View>
           <View style={styles.info}>

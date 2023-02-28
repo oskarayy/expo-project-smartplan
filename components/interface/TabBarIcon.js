@@ -1,17 +1,20 @@
 import { StyleSheet, View, Text, Platform } from 'react-native';
+import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
 
 const TabBarIcon = ({ icon, label, focused }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
+
   return (
     <View style={styles.container}>
       <Ionicons
         name={icon}
         size={24}
-        color={focused ? Colors.accent : Colors.gray200}
+        color={focused ? accentColor : Colors.gray200}
         style={styles.icon}
       />
-      <Text style={[styles.label, focused && { color: Colors.accent }]}>
+      <Text style={[styles.label, focused && { color: accentColor }]}>
         {label}
       </Text>
     </View>

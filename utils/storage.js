@@ -30,3 +30,13 @@ export const sendTasks = async (data) => {
     console.log('sending tasks error');
   }
 };
+
+export const sendSettings = async (settings) => {
+  try {
+    const jsonValue = JSON.stringify(settings);
+    await AsyncStorage.setItem('@settings', jsonValue);
+  } catch (error) {
+    console.log(error);
+    console.log('sending settings error');
+  }
+};

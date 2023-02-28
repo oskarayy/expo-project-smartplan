@@ -1,4 +1,5 @@
 import { StyleSheet, View, Text } from 'react-native';
+import { useSelector } from 'react-redux';
 import { Colors } from '../../constants/Colors';
 import { Fonts } from '../../constants/Fonts';
 
@@ -10,6 +11,8 @@ import Animated, {
 const AnimatedView = Animated.createAnimatedComponent(View);
 
 const ProjectStatus = ({ progress, procent, prev }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
+
   const animatedWidth = useAnimatedProps(() => {
     let barWidth = interpolate(
       progress.value,
@@ -40,7 +43,11 @@ const ProjectStatus = ({ progress, procent, prev }) => {
       <View style={styles.status}>
         <AnimatedView
           progress={progress}
-          style={[styles.statusBar, animatedWidth]}></AnimatedView>
+          style={[
+            styles.statusBar,
+            { backgroundColor: accentColor },
+            animatedWidth
+          ]}></AnimatedView>
       </View>
       <Text style={styles.procent}>{`${
         procent.toString() === 'NaN' ? 0 : procent
@@ -61,8 +68,7 @@ const styles = StyleSheet.create({
   },
   statusBar: {
     height: 2,
-    borderRadius: 1,
-    backgroundColor: Colors.accent
+    borderRadius: 1
   },
   procent: {
     ...Fonts.text300,

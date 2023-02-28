@@ -1,4 +1,5 @@
 import { StyleSheet, View, Text } from 'react-native';
+import { useSelector } from 'react-redux';
 import { Colors } from '../../constants/Colors';
 import { Fonts } from '../../constants/Fonts';
 
@@ -6,6 +7,7 @@ import TaskBar from '../tasks/TaskBar';
 import { getFormattedDate } from '../../utils/getFormattedDate';
 
 const DateBox = ({ name, tasks, time }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
   const tasksToDisplay = tasks.filter(
     (task) => new Date(task.deadline).getTime() === time
   );
@@ -16,7 +18,7 @@ const DateBox = ({ name, tasks, time }) => {
         <Text style={styles.day}>{name}</Text>
         <Text style={styles.rest}>{getFormattedDate(time, 'short')}</Text>
       </View>
-      <View style={styles.bar} />
+      <View style={[styles.bar, { backgroundColor: accentColor }]} />
       <View style={styles.list}>
         {tasksToDisplay.map((task) => (
           <TaskBar key={task.id} calendar taskData={task} />
@@ -52,7 +54,6 @@ const styles = StyleSheet.create({
   },
   bar: {
     height: 1.5,
-    borderRadius: 0.75,
-    backgroundColor: Colors.accent
+    borderRadius: 0.75
   }
 });

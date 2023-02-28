@@ -1,15 +1,16 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { Colors } from '../constants/Colors';
+import { useSelector } from 'react-redux';
 import { Fonts } from '../constants/Fonts';
 import { Ionicons } from '@expo/vector-icons';
 
 import TypeChoice from '../components/manage/TypeChoice';
 import ProjectForm from '../components/manage/ProjectForm';
-import { useSelector } from 'react-redux';
 
 const ManageScreen = ({ route, navigation }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
   const projects = useSelector((state) => state.projectSlice.projects);
+
   const [activeMode, setActiveMode] = useState('add');
   const [activeType, setActiveType] = useState('');
   const { id: activeId, mode, type } = route.params;
@@ -47,7 +48,7 @@ const ManageScreen = ({ route, navigation }) => {
     <View style={styles.root}>
       <View style={{ flex: 1, justifyContent: 'center' }}>
         <View style={{ alignItems: 'center' }}>
-          <Ionicons name={activeHeaderIcon} size={30} color={Colors.accent} />
+          <Ionicons name={activeHeaderIcon} size={30} color={accentColor} />
           <Text style={styles.title}>
             {activeMode === 'add'
               ? activeAddHeaderTitle

@@ -1,5 +1,6 @@
 import { View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import { Colors } from '../../../constants/Colors';
 import { Fonts } from '../../../constants/Fonts';
 
@@ -14,6 +15,7 @@ const ProjectControls = ({
   backTo
 }) => {
   const navigation = useNavigation();
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
 
   const goBackHandler = (submit) => {
     if (((activeProjectId || backTo) && type === 'task') || mode === 'update') {
@@ -63,7 +65,7 @@ const ProjectControls = ({
         style={{ flexBasis: '40%' }}
         buttonStyle={{
           borderWidth: 1,
-          borderColor: Colors.accent,
+          borderColor: accentColor,
           backgroundColor: Colors.gray10
         }}
         textStyle={{ ...Fonts.h4, color: Colors.gray500 }}
@@ -75,8 +77,8 @@ const ProjectControls = ({
         style={{ flexBasis: '40%' }}
         buttonStyle={{
           borderWidth: 1,
-          borderColor: Colors.accent,
-          backgroundColor: Colors.accent
+          borderColor: accentColor,
+          backgroundColor: accentColor
         }}
         textStyle={{
           ...Fonts.h4,

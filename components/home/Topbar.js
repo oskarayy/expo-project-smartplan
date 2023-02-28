@@ -10,7 +10,6 @@ const Topbar = () => {
         <Text
           style={{
             ...Fonts.text400,
-            // color: Colors.black,
             color: Colors.gray400,
             fontSize: 12,
             marginBottom: 1
@@ -20,7 +19,6 @@ const Topbar = () => {
         <Text
           style={{
             ...Fonts.h3,
-            // color: Colors.gray10,
             color: '#ffffff'
           }}>
           Jak tam Twoje postępy?

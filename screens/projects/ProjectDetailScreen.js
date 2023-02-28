@@ -18,6 +18,7 @@ const ProjectDetailScreen = ({ route, navigation }) => {
   const tasks = useSelector((state) => state.taskSlice.tasks);
   const projects = useSelector((state) => state.projectSlice.projects);
   const categories = useSelector((state) => state.projectSlice.categories);
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
 
   const projectId = route.params.id;
   const project = projects.find((item) => item.id === projectId) ?? {};
@@ -78,7 +79,7 @@ const ProjectDetailScreen = ({ route, navigation }) => {
       <ScrollView style={styles.root}>
         <View style={[styles.row, styles.header]}>
           <View style={styles.headerItem}>
-            <Ionicons name={category.icon} size={28} color={Colors.accent} />
+            <Ionicons name={category.icon} size={28} color={accentColor} />
           </View>
           <View style={styles.headerItem}>
             <Text style={styles.date}>{deadline.day}</Text>

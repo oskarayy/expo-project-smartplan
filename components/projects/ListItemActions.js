@@ -1,9 +1,12 @@
 import { StyleSheet, View } from 'react-native';
+import { useSelector } from 'react-redux';
 import { Colors } from '../../constants/Colors';
 
 import Button from '../interface/Button';
 
 const ListItemActions = ({ onRemove, onOpen }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
+
   return (
     <View
       style={{
@@ -15,7 +18,7 @@ const ListItemActions = ({ onRemove, onOpen }) => {
       <Button
         onPress={onRemove}
         style={styles.tasksButton}
-        buttonStyle={[styles.buttonStyle, { borderColor: Colors.accent }]}
+        buttonStyle={[styles.buttonStyle, { borderColor: accentColor }]}
         textStyle={{ fontSize: 12, color: Colors.gray400 }}>
         Usuń
       </Button>
