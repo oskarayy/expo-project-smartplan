@@ -9,14 +9,14 @@
     "splash": {
       "image": "./assets/splash-bg-md.png",
       "resizeMode": "cover",
-      "backgroundColor": "#000"
+      "backgroundColor": "#000000"
     },
     "plugins": [
       [
         "expo-notifications",
         {
-          "icon": "./asssets/cmimage.png",
-          "color": "#ffffff"
+          "icon": "./asssets/cmimage3.png",
+          "color": "#000000"
         }
       ]
     ],
@@ -25,16 +25,25 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification"]
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/cmimage3.png",
         "backgroundColor": "#000000"
-      }
+      },
+      "package": "com.oskarayy.expoprojectsmartnotes"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/cmimage.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "958a8050-8123-4c28-821e-b537343ef38c"
+      }
     }
   }
 }

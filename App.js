@@ -5,8 +5,9 @@ import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 
-//notifications
+// notifications //
 import * as Notifications from 'expo-notifications';
+import * as TaskManager from 'expo-task-manager';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
@@ -17,6 +18,35 @@ Notifications.setNotificationHandler({
     };
   }
 });
+
+// background tasks //
+
+const setupBackgroundNotificationTask = async (tasks) => {
+  await Notifications.setBadgeCountAsync(0);
+  const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK';
+
+  const bgNotificationsTaskCallback = async () => {
+    const todayFormatted = new Date().toISOString().slice(0, 10);
+    const todayTasks = tasks.filter((task) => {
+      if (task.deadline === todayFormatted) return task;
+    });
+
+    await Notifications.setBadgeCountAsync(todayTasks.length);
+  };
+
+  TaskManager.defineTask(
+    BACKGROUND_NOTIFICATION_TASK,
+    bgNotificationsTaskCallback
+  );
+
+  Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+
+  const isTaskRegistered = await TaskManager.isTaskRegisteredAsync(
+    BACKGROUND_NOTIFICATION_TASK
+  );
+
+  console.log('BackgroundNotificationTask registered: ', isTaskRegistered);
+};
 
 //data
 import { Provider, useSelector } from 'react-redux';
@@ -35,12 +65,12 @@ import {
 
 // navigation //
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 
 // components //
-import WelcomeScreen from './screens/WelcomeScreen';
 import HomeScreen from './screens/HomeScreen';
+import WelcomeScreen from './screens/WelcomeScreen';
 import ProjectsScreen from './screens/projects/ProjectsScreen';
 import ProjectsCategoryScreen from './screens/projects/ProjectsCategoryScreen';
 import ProjectDetailScreen from './screens/projects/ProjectDetailScreen';
@@ -121,6 +151,12 @@ const ProjectsNavigator = () => {
 };
 
 const Dashboard = () => {
+  const tasks = useSelector((state) => state.taskSlice.tasks);
+
+  useEffect(() => {
+    setupBackgroundNotificationTask(tasks);
+  }, []);
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -216,28 +252,12 @@ const Dashboard = () => {
 };
 
 export default function App() {
-  const requestPermissionsAsync = async () => {
-    if (Platform.OS === 'ios') {
-      const settings = await Notifications.getPermissionsAsync();
-      // console.log(settings);
-      return (
-        settings.granted ||
-        settings.ios?.status ===
-          Notifications.IosAuthorizationStatus.PROVISIONAL
-      );
-    } else if (Platform.OS === 'android') {
-      // Permissions.askAsync(Permissions.NOTIFICATIONS);
-    }
-  };
-
   const [fontsLoaded] = useFonts({
     Mulish_300Light,
     Mulish_400Regular,
     Exo2_600SemiBold,
     Exo2_700Bold
   });
-
-  requestPermissionsAsync();
 
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync();

@@ -1,6 +1,22 @@
 import { StyleSheet, View, Text, TextInput } from 'react-native';
-import { Colors } from '../../../constants/Colors';
-import { Fonts } from '../../../constants/Fonts';
+import { Colors } from '../../constants/Colors';
+import { Fonts } from '../../constants/Fonts';
+
+const ConfiguredInput = ({ isValid, inputStyle, inputConfig }) => (
+  <TextInput
+    style={[styles.textInput, inputStyle, !isValid && styles.invalidInput]}
+    placeholderTextColor={isValid ? Colors.gray200 : Colors.gray400}
+    {...inputConfig}
+  />
+);
+
+const InvalidInfo = ({ isUnique, label }) => (
+  <Text style={[styles.label, styles.invalid]}>
+    {!isUnique && label === 'Projekt'
+      ? 'Taki projekt już istnieje'
+      : 'Wymagane pole'}
+  </Text>
+);
 
 const FormItem = ({
   itemStyle,
@@ -8,25 +24,20 @@ const FormItem = ({
   inputConfig,
   label,
   children,
-  isValid = true
+  isValid = true,
+  isUnique
 }) => {
   return (
     <View style={[styles.formItem, itemStyle]}>
       <View style={styles.labelContainer}>
         <Text style={styles.label}>{label}</Text>
-        {!isValid && (
-          <Text style={[styles.label, styles.invalid]}>Wymagane pole</Text>
-        )}
+        {!isValid && <InvalidInfo isUnique={isUnique} label={label} />}
       </View>
       {inputConfig && (
-        <TextInput
-          style={[
-            styles.textInput,
-            inputStyle,
-            !isValid && styles.invalidInput
-          ]}
-          placeholderTextColor={isValid ? Colors.gray200 : Colors.gray400}
-          {...inputConfig}
+        <ConfiguredInput
+          isValid={isValid}
+          inputStyle={inputStyle}
+          inputConfig={inputConfig}
         />
       )}
       {children}

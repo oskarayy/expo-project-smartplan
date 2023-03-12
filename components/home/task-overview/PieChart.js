@@ -1,18 +1,21 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
 
 import Svg from 'react-native-svg';
 import ChartSegment from './ChartSegment';
 
-import { Colors, ChartColors } from '../../../constants/Colors';
+import { Colors } from '../../../constants/Colors';
 import { Styles } from '../../../constants/Styles';
 import { Fonts } from '../../../constants/Fonts';
 
 const size = 120;
 const strokeWidth = 18;
-const colors = Object.values(ChartColors);
 
 const PieChart = ({ children, stats, overall, progress }) => {
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
+
   const items = [stats.finished / overall, stats.active / overall];
+  const colors = [accentColor, Colors.chart2];
   const angles = [];
   let angle = -90;
 

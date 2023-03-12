@@ -15,6 +15,11 @@ const ManageScreen = ({ route, navigation }) => {
   const [activeType, setActiveType] = useState('');
   const { id: activeId, mode, type } = route.params;
 
+  const resetScreenHandler = () => {
+    setActiveMode('add');
+    setActiveType('');
+  };
+
   useEffect(() => {
     setActiveType(route.params?.type);
     setActiveMode(route.params?.mode);
@@ -30,9 +35,7 @@ const ManageScreen = ({ route, navigation }) => {
     activeType === 'project'
       ? 'Co nowego w planach?'
       : 'Jaki będzie kolejny krok?';
-
   const activeUpdateHeaderTitle = 'Mała zmiana planów?';
-
   const activeHeaderIcon = activeType === 'project' ? 'rocket' : 'star';
 
   if (activeType === '' && activeMode === 'add')
@@ -58,7 +61,7 @@ const ManageScreen = ({ route, navigation }) => {
         <ProjectForm
           type={activeType}
           mode={activeMode}
-          onType={setActiveType}
+          onResetScreen={resetScreenHandler}
           activeProject={activeProject}
         />
       </View>

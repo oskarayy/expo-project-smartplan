@@ -1,15 +1,48 @@
 import { View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
-import { Colors } from '../../../constants/Colors';
-import { Fonts } from '../../../constants/Fonts';
+import { Colors } from '../../constants/Colors';
+import { Fonts } from '../../constants/Fonts';
 
-import Button from '../../interface/Button';
+import Button from '../interface/Button';
+
+const goBack = (
+  navigation,
+  type,
+  mode,
+  resetFn,
+  activeProjectId,
+  backTo,
+  submit
+) => {
+  if (((activeProjectId || backTo) && type === 'task') || mode === 'update') {
+    navigation.navigate('projects', {
+      screen: 'projectDetail',
+      params: { id: activeProjectId ?? backTo, submit: true }
+    });
+  } else if (
+    (submit === true || activeProjectId) &&
+    backTo &&
+    type === 'project'
+  ) {
+    navigation.navigate('projects', {
+      screen: 'projectsCategory',
+      params: {
+        id: backTo ?? activeProjectId,
+        submit: true
+      }
+    });
+  } else if (activeProjectId && type === 'project') {
+    navigation.navigate('projects', {
+      screen: 'projectsList'
+    });
+  } else resetFn('');
+};
 
 const ProjectControls = ({
   mode,
   type,
-  onType,
+  onResetScreen,
   onSubmit,
   activeProjectId,
   backTo
@@ -17,40 +50,20 @@ const ProjectControls = ({
   const navigation = useNavigation();
   const { accentColor } = useSelector((state) => state.settingsSlice.options);
 
-  const goBackHandler = (submit) => {
-    if (((activeProjectId || backTo) && type === 'task') || mode === 'update') {
-      navigation.navigate('projects', {
-        screen: 'projectDetail',
-        params: { id: activeProjectId ?? backTo, submit: true }
-      });
-    } else if (
-      (submit === true || activeProjectId) &&
-      backTo &&
-      type === 'project'
-    ) {
-      navigation.navigate('projects', {
-        screen: 'projectsCategory',
-        params: {
-          id: backTo ?? activeProjectId,
-          submit: true
-        }
-      });
-    } else if (activeProjectId && type === 'project') {
-      navigation.navigate('projects', {
-        screen: 'projectsList'
-      });
-    } else {
-      onType('');
-      navigation.navigate('manage', {
-        mode: 'add',
-        type: ''
-      });
-    }
-  };
+  const basicGoBackFunctionProps = [
+    navigation,
+    type,
+    mode,
+    onResetScreen,
+    activeProjectId,
+    backTo
+  ];
+
+  const goBackHandler = () => goBack(...basicGoBackFunctionProps, false);
 
   const submitHandler = async () => {
     const validation = await onSubmit();
-    if (validation.form) goBackHandler(true);
+    if (validation.form) goBack(...basicGoBackFunctionProps, true);
   };
 
   return (

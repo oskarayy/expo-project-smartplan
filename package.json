@@ -33,7 +33,9 @@
     "react-native-svg": "13.4.0",
     "react-native-wheel-color-picker": "^1.2.0",
     "react-redux": "^8.0.5",
-    "toggle-switch-react-native": "^3.3.0"
+    "toggle-switch-react-native": "^3.3.0",
+    "expo-task-manager": "~11.0.1",
+    "expo-dev-client": "~2.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

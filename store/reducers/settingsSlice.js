@@ -7,12 +7,16 @@ const settingsSlice = createSlice({
   initialState: {
     options: {
       accentColor: Colors.accent,
-      notificationsTime: ['12', '00']
+      notificationsTime: ['12', '00'],
+      notificationsActive: true
     }
   },
   reducers: {
     updateOptions: (state, action) => {
-      state.options = action.payload;
+      state.options = {
+        ...state.options,
+        ...action.payload
+      };
       sendSettings(state.options);
     }
   }

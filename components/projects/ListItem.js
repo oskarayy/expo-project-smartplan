@@ -30,31 +30,34 @@ const categoriesPL = {
   relations: 'relacje'
 };
 
+const removeProjectHandler = (id, dispatch) => {
+  dispatch(removeProject(id));
+  dispatch(removeTask({ mode: 'multi', id }));
+};
+
+const openProjectHandler = (id, navigation) => {
+  navigation.navigate('projects', {
+    screen: 'projectDetail',
+    params: { id }
+  });
+};
+
 const ListItem = ({ item, progress }) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { accentColor } = useSelector((state) => state.settingsSlice.options);
 
-  const openProjectHandler = () => {
-    navigation.navigate('projects', {
-      screen: 'projectDetail',
-      params: { id: item.id }
-    });
-  };
+  const deadline = getFormattedDate(item.deadline, 'long');
+  const date = `${deadline.day}, ${deadline.date}`;
 
-  const removeProjectHandler = () => {
-    dispatch(removeProject(item.id));
-    dispatch(removeTask({ mode: 'multi', id: item.id }));
-  };
-
-  const today = getFormattedDate(item.deadline, 'long');
-  const date = `${today.day}, ${today.date}`;
+  const descriptionText =
+    item.desc.length < 1 ? 'Nie dodano jeszcze opisu projektu' : item.desc;
 
   return (
     <View style={styles.item}>
       <Pressable
         style={({ pressed }) => pressed && { opacity: 0.7 }}
-        onPress={openProjectHandler}>
+        onPress={openProjectHandler.bind(null, item.id, navigation)}>
         <Text style={{ ...Styles.date, fontSize: 10 }}>{date}</Text>
         <View style={styles.details}>
           <View style={styles.icon}>
@@ -71,15 +74,11 @@ const ListItem = ({ item, progress }) => {
             </Text>
           </View>
         </View>
-        <Text style={Styles.desc}>
-          {item.desc.length < 1
-            ? 'Nie dodano jeszcze opisu projektu'
-            : item.desc}
-        </Text>
+        <Text style={Styles.desc}>{descriptionText}</Text>
         <ProjectStatus progress={progress} procent={item.progress} />
         <ListItemActions
-          onRemove={removeProjectHandler}
-          onOpen={openProjectHandler}
+          onRemove={removeProjectHandler.bind(null, item.id, dispatch)}
+          onOpen={openProjectHandler.bind(null, item.id, navigation)}
         />
       </Pressable>
     </View>

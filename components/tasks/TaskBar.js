@@ -1,7 +1,12 @@
+import { useState } from 'react';
 import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { removeTask, toggleTaskState } from '../../store/reducers/taskSlice';
 import { updateActiveTasks } from '../../store/reducers/projectSlice';
+import {
+  removeTask,
+  toggleTaskState,
+  updateNotificationId
+} from '../../store/reducers/taskSlice';
 import * as Notifications from 'expo-notifications';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -9,14 +14,95 @@ import { Colors } from '../../constants/Colors';
 import { Fonts } from '../../constants/Fonts';
 
 import { getDeadlineString } from '../../utils/getDeadlineString';
+import { runConfirmationTimer } from '../../utils/confirmationTimer';
+
+import { Notification } from '../../models/Notification';
+import NewTaskButton from './NewTaskButton';
+import TaskActions from './TaskActions';
+
+const updateProjectProgress = async (
+  taskData,
+  activeProject,
+  notificationsActive,
+  notificationsTime,
+  dispatchFn
+) => {
+  dispatchFn(toggleTaskState(taskData.id));
+  dispatchFn(
+    updateActiveTasks({
+      id: activeProject.id,
+      delta: taskData.finished ? -1 : 1
+    })
+  );
+
+  if (!taskData.finished) {
+    await Notifications.cancelScheduledNotificationAsync(
+      taskData.notificationId
+    );
+  } else if (taskData.finished && notificationsActive) {
+    const notificationData = new Notification(taskData, activeProject, {
+      hour: +notificationsTime[0],
+      minute: +notificationsTime[1],
+      repeats: true
+    });
+    const notificationId = await Notifications.scheduleNotificationAsync(
+      notificationData
+    );
+    dispatchFn(updateNotificationId({ taskId: taskData.id, notificationId }));
+  }
+};
+
+const removeTaskHandler = async (taskData, activeProject, dispatchFn) => {
+  dispatchFn(
+    updateActiveTasks({
+      id: activeProject.id,
+      finished: taskData.finished ? -1 : 0,
+      active: taskData.finished ? 0 : -1
+    })
+  );
+  dispatchFn(removeTask({ mode: 'single', id: taskData.id }));
+  return await Notifications.cancelScheduledNotificationAsync(
+    taskData.notificationId
+  );
+};
+
+const CalendarTaskSubline = ({ activeProject, accentColor }) => (
+  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <Text style={[styles.title, styles.calendarTitle]}>
+      {activeProject.title}
+    </Text>
+    <Text
+      style={[
+        styles.progress,
+        styles.calendarProgress,
+        { color: accentColor }
+      ]}>
+      {activeProject.progress === 'NaN' ? '0' : activeProject.progress}%
+    </Text>
+  </View>
+);
+
+const RemoveConfirmation = ({ onPress, accentColor, timer }) => (
+  <Pressable
+    style={[styles.confirmation, { backgroundColor: accentColor }]}
+    onPress={onPress}>
+    <Text
+      style={{
+        ...Fonts.text400
+      }}>{`Potwierdź usunięcie (${timer})`}</Text>
+  </Pressable>
+);
 
 const TaskBar = ({ taskData = {}, calendar, onNewTask }) => {
   const dispatch = useDispatch();
-  const { accentColor, notificationsTime } = useSelector(
+  const [confirmation, setConfirmation] = useState(false);
+  const [timer, setTimer] = useState(3);
+  const { accentColor, notificationsTime, notificationsActive } = useSelector(
     (state) => state.settingsSlice.options
   );
   const projects = useSelector((state) => state.projectSlice.projects);
   const categories = useSelector((state) => state.projectSlice.categories);
+  const deadline = getDeadlineString(taskData.deadline, true);
 
   const activeProject =
     projects.find((item) => item.id === taskData.projectId) ?? {};
@@ -24,133 +110,70 @@ const TaskBar = ({ taskData = {}, calendar, onNewTask }) => {
   const activeCategory =
     categories.find((item) => item.id === activeProject?.category) ?? {};
 
-  const deadline = getDeadlineString(taskData.deadline, true);
-
-  const newNotificationHandler = async (title, body, data, trigger) => {
-    return await Notifications.scheduleNotificationAsync({
-      content: { title, body, data },
-      trigger
-    });
-  };
-
-  const updateProjectProgress = async () => {
-    dispatch(toggleTaskState(taskData.id));
-    dispatch(
-      updateActiveTasks({
-        id: activeProject.id,
-        delta: taskData.finished ? -1 : 1,
-        mode: 'update'
-      })
-    );
-
-    /// DO OGARNIĘCIA !!!
-
-    if (!taskData.finished)
-      await Notifications.cancelScheduledNotificationAsync(
-        taskData.notificationId
-      );
-    if (taskData.finished) {
-      await newNotificationHandler(
-        taskData.task,
-        'Projekt: ' + activeProject.title,
-        { taskId: taskData.id },
-        {
-          hour: +notificationsTime[0],
-          minute: +notificationsTime[1],
-          repeats: true
-        }
-      );
-    }
-  };
-
-  const removeTaskHandler = async () => {
-    dispatch(
-      updateActiveTasks({
-        id: activeProject.id,
-        finished: taskData.finished ? 1 : 0,
-        active: taskData.finished ? 0 : 1
-      })
-    );
-    dispatch(removeTask({ mode: 'single', id: taskData.id }));
-    return await Notifications.cancelScheduledNotificationAsync(
-      taskData.notificationId
+  const updateProjectProgressHandler = () => {
+    updateProjectProgress(
+      taskData,
+      activeProject,
+      notificationsActive,
+      notificationsTime,
+      dispatch
     );
   };
 
   if (onNewTask)
     return (
-      <Pressable
-        style={({ pressed }) => pressed && { opacity: 0.7 }}
-        onPress={onNewTask}>
-        <View
-          style={[
-            styles.bar,
-            styles.taskBarButton,
-            { borderColor: accentColor }
-          ]}>
-          <Text style={[styles.title, { marginRight: 0, color: accentColor }]}>
-            Dodaj zadanie
-          </Text>
-        </View>
-      </Pressable>
+      <NewTaskButton
+        onNewTask={onNewTask}
+        barStyle={styles.bar}
+        textStyle={styles.title}
+      />
     );
 
   return (
     <View style={styles.bar}>
       <View style={[styles.iconBox, !calendar && { flexBasis: '10%' }]}>
-        <Pressable onPress={updateProjectProgress}>
-          <Ionicons
-            name={calendar ? activeCategory.icon : 'star'}
-            size={calendar ? 24 : 12}
-            color={accentColor}
-          />
-        </Pressable>
+        <Ionicons
+          name={calendar ? activeCategory.icon : 'star'}
+          size={calendar ? 24 : 12}
+          color={accentColor}
+        />
       </View>
       <View style={{ flex: 1 }}>
-        <Pressable style={{ flex: 1 }} onPress={updateProjectProgress}>
+        <Pressable style={{ flex: 1 }} onPress={updateProjectProgressHandler}>
           <Text style={[styles.task, !calendar && styles.calendarTask]}>
             {taskData.task}
           </Text>
           {!calendar && <Text style={styles.deadline}>{deadline}</Text>}
           {calendar && (
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={[styles.title, calendar && styles.calendarTitle]}>
-                {activeProject.title}
-              </Text>
-              <Text
-                style={[
-                  styles.progress,
-                  calendar && styles.calendarProgress,
-                  { color: accentColor }
-                ]}>
-                {activeProject.progress}%
-              </Text>
-            </View>
+            <CalendarTaskSubline
+              activeProject={activeProject}
+              accentColor={accentColor}
+            />
           )}
         </Pressable>
       </View>
-      <View style={styles.checkbox}>
-        <Pressable onPress={updateProjectProgress}>
-          <Ionicons
-            name={
-              taskData.finished
-                ? 'checkmark-circle'
-                : 'checkmark-circle-outline'
-            }
-            size={calendar ? 26 : 24}
-            color={taskData.finished ? accentColor : Colors.gray100}
-          />
-        </Pressable>
-      </View>
-      <View style={styles.checkbox}>
-        <Pressable onPress={removeTaskHandler}>
-          <Ionicons
-            name='close'
-            size={calendar ? 26 : 24}
-            color={Colors.gray100}
-          />
-        </Pressable>
-      </View>
+      <TaskActions
+        calendar={calendar}
+        finished={taskData.finished}
+        checkbox
+        onUpdate={updateProjectProgressHandler}
+      />
+      <TaskActions
+        calendar={calendar}
+        onRemove={runConfirmationTimer.bind(null, setConfirmation, setTimer)}
+      />
+      {confirmation && (
+        <RemoveConfirmation
+          accentColor={accentColor}
+          timer={timer}
+          onPress={removeTaskHandler.bind(
+            null,
+            taskData,
+            activeProject,
+            dispatch
+          )}
+        />
+      )}
     </View>
   );
 };
@@ -167,11 +190,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     borderRadius: 12,
     backgroundColor: Colors.gray10
-  },
-  taskBarButton: {
-    flexDirection: 'column',
-    backgroundColor: Colors.gray10,
-    borderWidth: 1.5
   },
   iconBox: { flexBasis: '14%', alignItems: 'center' },
   title: {
@@ -200,7 +218,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1
   },
   calendarProgress: { fontSize: 9, color: Colors.gray100 },
-  checkbox: {
-    marginRight: 8
+  confirmation: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12
   }
 });

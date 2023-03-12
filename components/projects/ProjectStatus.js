@@ -34,7 +34,13 @@ const ProjectStatus = ({ progress, procent, prev }) => {
     }
 
     return {
-      width: barWidth + '%'
+      width:
+        barWidth === 'NaN' ||
+        barWidth === '0NaN' ||
+        barWidth === 'NaNNaN' ||
+        !barWidth
+          ? 0
+          : barWidth + '%'
     };
   });
 
@@ -50,7 +56,7 @@ const ProjectStatus = ({ progress, procent, prev }) => {
           ]}></AnimatedView>
       </View>
       <Text style={styles.procent}>{`${
-        procent.toString() === 'NaN' ? 0 : procent
+        procent?.toString() === 'NaN' || !procent ? 0 : procent
       }%`}</Text>
     </>
   );

@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-const myTheme = require('./PickerTheme.js');
+
+const validTheme = require('./ValidTheme.js');
+const invalidTheme = require('./InvalidTheme.js');
 
 DropDownPicker.addTranslation('PL', {
   PLACEHOLDER: 'Wybierz z listy',
@@ -12,25 +14,40 @@ DropDownPicker.addTranslation('PL', {
 });
 DropDownPicker.setLanguage('PL');
 
-DropDownPicker.addTheme('MyThemeName', myTheme);
-DropDownPicker.setTheme('MyThemeName');
+DropDownPicker.addTheme('ValidTheme', validTheme);
+DropDownPicker.addTheme('InvalidTheme', invalidTheme);
 
-const DropdownPicker = ({ data, value, onChange, onValid }) => {
+const DropdownPicker = ({ data, value, onValue, isValid }) => {
   const route = useRoute();
 
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
+
+  const newValueHandler = (getValue) => {
+    onValue({
+      type: 'UPDATE_VALUES',
+      values: { dropdown: getValue() }
+    });
+  };
 
   useEffect(() => {
     setItems(data);
   }, [data]);
 
   useEffect(() => {
-    onValid();
+    DropDownPicker.setTheme(isValid ? 'ValidTheme' : 'InvalidTheme');
+  }, [isValid]);
+
+  useEffect(() => {
+    onValue({ type: 'VALUES_VALIDATION', dropdown: true });
   }, [value]);
 
   useEffect(() => {
-    if (route.params) onChange(route.params?.id);
+    if (route.params)
+      onValue({
+        type: 'UPDATE_VALUES',
+        values: { dropdown: route.params?.id }
+      });
   }, [route]);
 
   return (
@@ -39,7 +56,7 @@ const DropdownPicker = ({ data, value, onChange, onValid }) => {
       value={value}
       items={items}
       setOpen={setOpen}
-      setValue={onChange}
+      setValue={newValueHandler}
       setItems={setItems}
       maxHeight={262}
       zIndex={999}

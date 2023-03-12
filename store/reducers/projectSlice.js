@@ -65,9 +65,9 @@ const projectSlice = createSlice({
         updatedProject = {
           ...state.projects[activeProjectIndex],
           tasks: {
-            active: state.projects[activeProjectIndex].tasks.active - active,
+            active: state.projects[activeProjectIndex].tasks.active + active,
             finished:
-              state.projects[activeProjectIndex].tasks.finished - finished
+              state.projects[activeProjectIndex].tasks.finished + finished
           }
         };
       }

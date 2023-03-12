@@ -21,10 +21,10 @@ export default StyleSheet.create({
     minHeight: 50,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.gray100,
     paddingHorizontal: 10,
     paddingVertical: 3,
-    backgroundColor: Colors.gray10
+    backgroundColor: '#EA372955',
+    borderColor: Colors.gray200
   },
   label: {
     flex: 1,
@@ -150,7 +150,9 @@ export default StyleSheet.create({
     alignItems: 'center',
     padding: 10
   },
-  listMessageText: {},
+  listMessageText: {
+    color: Colors.gray400
+  },
   selectedItemContainer: {},
   selectedItemLabel: {},
   modalTitle: {

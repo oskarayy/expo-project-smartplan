@@ -1,59 +1,35 @@
 import { useState } from 'react';
-import { StyleSheet, View, Pressable } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import ColorPicker from 'react-native-wheel-color-picker';
 
 import { Colors } from '../../constants/Colors';
-import { Fonts } from '../../constants/Fonts';
+import ActionButtons from '../interface/ActionButtons';
 
-import Button from '../interface/Button';
-
-const ColorModal = ({ onFinish }) => {
-  const [color, setColor] = useState();
+const ColorModal = ({ onFinish, accentColor }) => {
+  const [color, setColor] = useState(accentColor);
   return (
     <View style={styles.root}>
-      <Pressable
-        onPress={() => console.log(color)}
-        style={{ flex: 1, alignItems: 'center' }}>
-        <View style={styles.container}>
-          <ColorPicker
-            color={color}
-            onColorChangeComplete={(color) => setColor(color)}
-            onColorChange={(color) => setColor(color)}
-          />
-        </View>
-        <Button
-          onPress={() => onFinish(color)}
-          buttonStyle={{
-            width: 150,
-            marginTop: 50,
-            backgroundColor: color,
-            borderColor: color
-          }}
-          textStyle={{
-            ...Fonts.h4,
-            color: '#000'
-          }}>
-          OK
-        </Button>
-        <Button
-          onPress={() => onFinish()}
-          buttonStyle={{
-            width: 150,
-            marginTop: 20,
-            borderColor: 'white'
-          }}
-          textStyle={{
-            ...Fonts.h4
-          }}>
-          Anuluj
-        </Button>
-      </Pressable>
+      <View style={styles.container}>
+        <ColorPicker
+          color={color}
+          onInteractionStart={() => setColor(accentColor)}
+          onColorChangeComplete={(color) => setColor(color)}
+          onColorChange={(color) => setColor(color)}
+        />
+      </View>
+      <ActionButtons
+        onCancel={onFinish.bind(null, null)}
+        onSubmit={onFinish.bind(null, color)}
+        submitText='OK'
+        color={color}
+      />
     </View>
   );
 };
 export default ColorModal;
 const styles = StyleSheet.create({
   root: {
+    alignItems: 'center',
     position: 'absolute',
     left: 0,
     top: 0,

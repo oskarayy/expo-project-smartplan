@@ -1,7 +1,8 @@
-import { useLayoutEffect, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { useLayoutEffect, useEffect, useState } from 'react';
+import { StyleSheet, View, Text, ScrollView, Button } from 'react-native';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSelector } from 'react-redux';
+import * as Notifications from 'expo-notifications';
 
 import { Colors } from '../../constants/Colors';
 import { Fonts } from '../../constants/Fonts';
@@ -14,30 +15,73 @@ import TaskBar from '../../components/tasks/TaskBar';
 import Blur from '../../components/interface/Blur';
 import HeaderIconButton from '../../components/interface/HeaderIconButton';
 
-const ProjectDetailScreen = ({ route, navigation }) => {
-  const tasks = useSelector((state) => state.taskSlice.tasks);
-  const projects = useSelector((state) => state.projectSlice.projects);
-  const categories = useSelector((state) => state.projectSlice.categories);
-  const { accentColor } = useSelector((state) => state.settingsSlice.options);
+const getTaskTime = (task) => new Date(task.deadline).getTime();
 
-  const projectId = route.params.id;
+const getActiveProjectData = (tasks, projects, categories, projectId) => {
   const project = projects.find((item) => item.id === projectId) ?? {};
   const category = categories.find((cat) => cat.id === project.category) ?? {};
-  const progress = useSharedValue(0);
-  const getTaskTime = (task) => new Date(task.deadline).getTime();
 
   const filteredTasks = tasks.filter((task) => task.projectId === project.id);
   const tasksInOrder = filteredTasks.sort((a, b) => {
     return getTaskTime(a) - getTaskTime(b);
   });
 
-  let deadline = getFormattedDate(project.deadline, 'long');
+  return { project, categoryIcon: category.icon, tasksInOrder };
+};
+
+const getProjectDeadline = (project, tasksInOrder) => {
   const projectDeadline = new Date(project.deadline);
   const lastTaskDeadline = new Date(
     tasksInOrder[tasksInOrder.length - 1]?.deadline
   );
-  if (projectDeadline.getTime() < lastTaskDeadline.getTime())
-    deadline = getFormattedDate(lastTaskDeadline, 'long');
+
+  if (projectDeadline.getTime() < lastTaskDeadline.getTime()) {
+    return getFormattedDate(lastTaskDeadline, 'long');
+  } else return getFormattedDate(project.deadline, 'long');
+};
+
+const renderHeaderButton = (navigation, project, projectId) => {
+  navigation.setOptions({
+    title: project.title ?? 'Projekt',
+    headerRight: () => (
+      <HeaderIconButton
+        icon='pencil'
+        size={24}
+        style={{ paddingRight: 12 }}
+        onPress={() =>
+          navigation.navigate('manage', {
+            mode: 'update',
+            type: 'project',
+            id: projectId
+          })
+        }
+      />
+    )
+  });
+};
+
+const TaskList = ({ tasks }) => {
+  if (tasks.length > 0) {
+    return tasks.map((task) => <TaskBar key={task.id} taskData={task} />);
+  } else
+    return <Text style={styles.notasks}>Nie dodano jeszcze żadnych zadań</Text>;
+};
+
+const ProjectDetailScreen = ({ route, navigation }) => {
+  const tasks = useSelector((state) => state.taskSlice.tasks);
+  const { projects, categories } = useSelector((state) => state.projectSlice);
+  const { accentColor } = useSelector((state) => state.settingsSlice.options);
+  const progress = useSharedValue(0);
+  const projectId = route.params.id;
+
+  const [projectData, setProjectData] = useState(
+    getActiveProjectData(tasks, projects, categories, projectId)
+  );
+
+  const deadline = getProjectDeadline(
+    projectData.project,
+    projectData.tasksInOrder
+  );
 
   const newTaskButtonHandler = () => {
     navigation.navigate('manage', {
@@ -48,38 +92,38 @@ const ProjectDetailScreen = ({ route, navigation }) => {
   };
 
   useLayoutEffect(() => {
-    navigation.setOptions({
-      title: project.title ?? 'Projekt',
-      headerRight: () => (
-        <HeaderIconButton
-          icon='pencil'
-          size={24}
-          style={{ paddingRight: 12 }}
-          onPress={() =>
-            navigation.navigate('manage', {
-              mode: 'update',
-              type: 'project',
-              id: projectId
-            })
-          }
-        />
-      )
-    });
-  }, [project]);
+    renderHeaderButton(navigation, projectData.project, projectId);
+  }, [projectData, projectId, navigation, renderHeaderButton]);
 
   useEffect(() => {
     progress.value = 0;
     progress.value = withTiming(1, {
       duration: 1500
     });
-  }, [progress, project]);
+
+    setProjectData(
+      getActiveProjectData(tasks, projects, categories, projectId)
+    );
+  }, [
+    progress,
+    projectId,
+    tasks,
+    projects,
+    categories,
+    getActiveProjectData,
+    withTiming
+  ]);
 
   return (
     <>
       <ScrollView style={styles.root}>
         <View style={[styles.row, styles.header]}>
           <View style={styles.headerItem}>
-            <Ionicons name={category.icon} size={28} color={accentColor} />
+            <Ionicons
+              name={projectData.categoryIcon}
+              size={28}
+              color={accentColor}
+            />
           </View>
           <View style={styles.headerItem}>
             <Text style={styles.date}>{deadline.day}</Text>
@@ -88,26 +132,21 @@ const ProjectDetailScreen = ({ route, navigation }) => {
         </View>
         <ProjectStatus
           progress={progress}
-          procent={project.progress}
-          prev={project.previousProgress}
+          procent={projectData.project.progress}
+          prev={projectData.project.previousProgress}
         />
-        {project.desc?.length > 0 && (
-          <Text style={styles.desc}>{project.desc}</Text>
+        {projectData.project.desc?.length > 0 && (
+          <Text style={styles.desc}>{projectData.project.desc}</Text>
         )}
-        {(!project.desc || project.desc?.length === 0) && (
+        {(!projectData.project.desc ||
+          projectData.project.desc?.length === 0) && (
           <Text style={[styles.desc, { color: Colors.gray300 }]}>
             Nie dodano jeszcze opisu projektu
           </Text>
         )}
         <View style={styles.tasksBox}>
           <TaskBar onNewTask={newTaskButtonHandler} />
-          {tasksInOrder.length > 0 &&
-            tasksInOrder.map((task) => (
-              <TaskBar key={task.id} taskData={task} />
-            ))}
-          {tasksInOrder.length === 0 && (
-            <Text style={styles.notasks}>Nie dodano jeszcze żadnych zadań</Text>
-          )}
+          <TaskList tasks={projectData.tasksInOrder} />
         </View>
       </ScrollView>
       <Blur />

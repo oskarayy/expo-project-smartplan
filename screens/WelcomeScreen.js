@@ -1,5 +1,9 @@
+import { useEffect } from 'react';
 import { StyleSheet, View, Text, ImageBackground, Image } from 'react-native';
 import { useDispatch } from 'react-redux';
+
+import * as Notifications from 'expo-notifications';
+import { getNotificationsPermission } from '../utils/getNotificationsPermission';
 
 import Button from '../components/interface/Button';
 import { Fonts } from '../constants/Fonts';
@@ -8,32 +12,61 @@ import { setTasks } from '../store/reducers/taskSlice';
 import { setProjects } from '../store/reducers/projectSlice';
 import { updateOptions } from '../store/reducers/settingsSlice';
 import { getData } from '../utils/storage';
+import { checkAsyncStorageData } from '../utils/validations';
 
 const cmImage = require('../assets/cmimage.png');
 const backgroundImage = require('../assets/splash-bg-md.jpg');
 
+const getDataFromStorage = async (dispatchFn) => {
+  const projects = await getData('projects');
+  const tasks = await getData('tasks');
+  const settings = await getData('settings');
+
+  const { projectsOK, tasksOK, settingsOK } = checkAsyncStorageData(
+    projects,
+    tasks,
+    settings
+  );
+
+  if (projectsOK) dispatchFn(setProjects(projects));
+  if (tasksOK) dispatchFn(setTasks(tasks));
+  if (settingsOK) dispatchFn(updateOptions(settings));
+
+  if (projectsOK && tasksOK && settingsOK) return true;
+};
+
+const getUserNotificationSettings = async (dispatchFn) => {
+  const { permission } = await getNotificationsPermission();
+
+  if (!permission) {
+    dispatchFn(updateOptions({ notificationsActive: false }));
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  }
+};
+
 const Welcome = ({ navigation }) => {
   const dispatch = useDispatch();
 
-  const getDataFromStorage = async () => {
-    const projects = await getData('projects');
-    const tasks = await getData('tasks');
-    const settings = await getData('settings');
+  useEffect(() => {
+    getDataFromStorage(dispatch);
+    getUserNotificationSettings(dispatch);
+  }, []);
 
-    if (Array.isArray(projects)) dispatch(setProjects(projects));
-    if (Array.isArray(tasks)) dispatch(setTasks(tasks));
-    if (
-      Array.isArray(settings.notificationsTime) &&
-      settings.accentColor.length === 7
-    )
-      dispatch(updateOptions(settings));
-  };
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      async (response) => {
+        await getDataFromStorage(dispatch);
+        const { projectId } = response.notification.request.content.data;
+        navigation.navigate('projects', {
+          screen: 'projectDetail',
+          params: { id: projectId }
+        });
+      }
+    );
+    return () => subscription.remove();
+  }, []);
 
-  getDataFromStorage();
-
-  const openDashboard = () => {
-    navigation.navigate('dashboard');
-  };
+  const openDashboard = () => navigation.navigate('dashboard');
 
   return (
     <View style={styles.container}>

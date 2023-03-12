@@ -65,18 +65,18 @@ const TaskOverview = ({ progress, tasksOverall, onOverall }) => {
       {todayTasksAmount > 0 && (
         <View style={styles.statsContainer}>
           <View>
-            <Text style={{ ...styles.statName, color: ChartColors.chart2 }}>
+            <Text style={{ ...styles.statName, color: Colors.chart2 }}>
               Aktywne
             </Text>
-            <Text style={{ ...styles.statNumber, color: ChartColors.chart2 }}>
+            <Text style={{ ...styles.statNumber, color: Colors.chart2 }}>
               {stats.active}
             </Text>
           </View>
           <View>
-            <Text style={{ ...styles.statName, color: ChartColors.chart1 }}>
+            <Text style={{ ...styles.statName, color: accentColor }}>
               Ukończone
             </Text>
-            <Text style={{ ...styles.statNumber, color: ChartColors.chart1 }}>
+            <Text style={{ ...styles.statNumber, color: accentColor }}>
               {stats.finished}
             </Text>
           </View>

@@ -11,10 +11,6 @@ export const Colors = {
   gray300: '#BDBEBF',
   gray400: '#E3E4E6',
   gray500: '#FBFCFE',
-  accent: '#FE6235'
-};
-
-export const ChartColors = {
-  chart1: '#FE6235',
-  chart2: '#feac92'
+  accent: '#FE6235',
+  chart2: '#FEFEFE'
 };

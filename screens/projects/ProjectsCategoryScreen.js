@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect } from 'react';
-import { StyleSheet, View, FlatList } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -10,30 +10,37 @@ import Blur from '../../components/interface/Blur';
 import NoItemsFound from '../../components/interface/NoItemsFound';
 import ListItem from '../../components/projects/ListItem';
 
-const ProjectCategoryScreen = ({ route, navigation }) => {
-  const projects = useSelector((state) => state.projectSlice.projects);
-  const categories = useSelector((state) => state.projectSlice.categories);
+const renderHeaderIcon = (navigation, activeCategory, categoryId) => {
+  navigation.setOptions({
+    title: activeCategory.name,
+    headerRight: () => (
+      <HeaderIconButton
+        icon='add'
+        onPress={() =>
+          navigation.navigate('manage', {
+            mode: 'add',
+            type: 'project',
+            id: categoryId
+          })
+        }
+      />
+    )
+  });
+};
 
-  const progress = useSharedValue(0);
-  const categoryId = route.params?.id;
+const ProjectCategoryScreen = ({ route, navigation }) => {
+  const { projects, categories } = useSelector((state) => state.projectSlice);
+  const categoryId = route.params?.id ?? 'all';
   const activeCategory = categories.find((item) => item.id === categoryId);
+  const progress = useSharedValue(0);
+
+  const projectsToDisplay =
+    categoryId === 'all'
+      ? projects
+      : projects.filter((proj) => proj.category === activeCategory.id);
 
   useLayoutEffect(() => {
-    navigation.setOptions({
-      title: activeCategory.name,
-      headerRight: () => (
-        <HeaderIconButton
-          icon='add'
-          onPress={() =>
-            navigation.navigate('manage', {
-              mode: 'add',
-              type: 'project',
-              id: categoryId
-            })
-          }
-        />
-      )
-    });
+    renderHeaderIcon(navigation, activeCategory, categoryId);
   }, [activeCategory]);
 
   useEffect(() => {
@@ -42,13 +49,6 @@ const ProjectCategoryScreen = ({ route, navigation }) => {
       duration: 1500
     });
   }, [progress]);
-
-  let projectsToDisplay = projects;
-  if (categoryId !== 'all') {
-    projectsToDisplay = projectsToDisplay.filter(
-      (proj) => proj.category === activeCategory.id
-    );
-  }
 
   if (projectsToDisplay.length < 1)
     return (
@@ -59,13 +59,13 @@ const ProjectCategoryScreen = ({ route, navigation }) => {
     );
 
   return (
-    <View style={styles.root}>
+    <View style={{ ...Styles.root, paddingTop: 12 }}>
       <FlatList
         data={projectsToDisplay}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <ListItem item={item} progress={progress} />}
         scrollEnbled={true}
-        listStyle={styles.list}
+        contentContainerStyle={{ paddingBottom: 140 }}
       />
       <Blur />
     </View>
@@ -73,15 +73,3 @@ const ProjectCategoryScreen = ({ route, navigation }) => {
 };
 
 export default ProjectCategoryScreen;
-
-const styles = StyleSheet.create({
-  root: {
-    ...Styles.root,
-    paddingTop: 12
-  },
-  list: {
-    alignItems: 'stretch',
-    justifyContent: 'center',
-    paddingBottom: 130
-  }
-});
