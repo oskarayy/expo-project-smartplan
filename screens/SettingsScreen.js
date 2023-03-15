@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { StyleSheet, View, Text, Platform, Button, Alert } from 'react-native';
+import { StyleSheet, View, Text, Platform, Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import ToggleSwitch from 'toggle-switch-react-native';
 
 import * as Notifications from 'expo-notifications';
-import * as TaskManager from 'expo-task-manager';
 import { getNotificationsPermission } from '../utils/getNotificationsPermission';
 import { updateNotificationId } from '../store/reducers/taskSlice';
 import { updateOptions } from '../store/reducers/settingsSlice';
@@ -235,19 +234,6 @@ const SettingsScreen = () => {
           cancelText='Reset'
         />
         <Info progress={progress} type={infoType} />
-        <Button
-          title='show Notif List'
-          onPress={async () => {
-            console.log(
-              await Notifications.getAllScheduledNotificationsAsync()
-            );
-            console.log(
-              await TaskManager.getTaskOptionsAsync(
-                'BACKGROUND-NOTIFICATION-TASK'
-              )
-            );
-          }}
-        />
       </View>
       {colorModal && (
         <ColorModal
