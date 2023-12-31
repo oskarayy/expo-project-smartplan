@@ -3,11 +3,11 @@ import { getProjectProgress } from '../../utils/getProjectProgress';
 
 const categories = [
   { id: 'all', name: 'Wszystkie', icon: 'layers-outline' },
-  { id: 'love', name: 'Miłość', icon: 'heart-outline' },
   { id: 'health', name: 'Zdrowie', icon: 'pulse-outline' },
+  { id: 'soul', name: 'Dusza', icon: 'rose-outline' },
   { id: 'career', name: 'Kariera', icon: 'briefcase-outline' },
   { id: 'finances', name: 'Finanse', icon: 'wallet-outline' },
-  { id: 'soul', name: 'Dusza', icon: 'rose-outline' },
+  { id: 'love', name: 'Miłość', icon: 'heart-outline' },
   { id: 'relations', name: 'Relacje', icon: 'people-outline' }
 ];
 
