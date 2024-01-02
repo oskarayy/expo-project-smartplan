@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "SmartNotes",
+    "name": "Harmony6",
     "slug": "expo-project-smartnotes",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -28,7 +28,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification"]
-      }
+      },
+      "bundleIdentifier": "com.oskarayy.expoprojectsmartnotes"
     },
     "android": {
       "adaptiveIcon": {
